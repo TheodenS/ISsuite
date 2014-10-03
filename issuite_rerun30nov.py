@@ -179,7 +179,7 @@ if not os.path.isfile(place_contig_dic_location):
     metadata_csv
     print runstring
 
-    #os.system(runstring)
+    os.system(runstring)
 
 
 #if True:
@@ -192,7 +192,7 @@ if not os.path.isfile(iscounts_contigcsv):
     #runstring+=" -database="+"/Users/security/science/trydic2.csv"
     runstring+=" -outcsv="+iscounts_contigcsv
     print runstring
-    #os.system(runstring)
+    os.system(runstring)
 
 prog="/Users/security/science/software/ISsuite/"+"join_csvs.py"
 runstring="python "+prog
