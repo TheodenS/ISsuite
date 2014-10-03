@@ -77,9 +77,9 @@ for place in range(33,87):
         fracrow+=str(int(val))+","
 
 
-        csvl+=str(place_totalcount)+","
-        csvl+=fracrow+","
-        csvl+="\n"
+    csvl+=str(place_totalcount)+","
+        #csvl+=fracrow+","
+    csvl+="\n"
     #print place_totalcount
 
 rh=open(args.place_contig_csv,"w")
