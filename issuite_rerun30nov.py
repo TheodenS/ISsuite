@@ -121,7 +121,7 @@ runstring="python "+prog+" -genomeblastdb "+genomedbfilebase+" -blastlocation "+
 runstring+=" -queryfile " + args.queryfastafile
 runstring+=" -genomefasta " +genomefasta_dir+"renamed.fa" 
 
-#os.system(runstring)
+os.system(runstring)
 
 report("ran blast_reps_vs_genomes_fasta.py\n",text_results_file)
 
@@ -132,7 +132,7 @@ runstring="python "+prog+" -blastoutput "+contigxmlresultspath
 runstring+=" -gbfilesdir "+gbfilesdir
 runstring+=" -evalue "+str(args.maxeval)
 runstring+=" -genomedb "+genomedatabase
-#os.system(runstring)
+os.system(runstring)
 
 
 prog="/Users/security/science/software/ISsuite/"+"id_gb_strings.py"
@@ -141,7 +141,7 @@ runstring="python "+prog+" -gbfiles "+gbfilesdir +" -tempfile "+helperfiles_dir+
 runstring+=" -repsfa "+args.queryfastafile
 runstring+=" -repeatsdb "+genomedbfilebase+"repsblastbase"
 print runstring
-#os.system(runstring)
+os.system(runstring)
 
 
 #prog="/Users/security/science/software/ISsuite/"+"parse_oldnewtret2.py"

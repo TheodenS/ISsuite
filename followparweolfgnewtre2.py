@@ -116,6 +116,11 @@ def makefracstring(contl,fraclist):
         retstring+= str(contl[line])+","
     return retstring
 
+def foundatlocation(myloc,contname):
+    num=placecontigdic[myloc][contname]
+    return num
+
+
 fraclist=[[0, 5], [5, 15], [15, 25], [25, 35], [35, 45], [45, 55], [55, 65], [65, 75], [75, 85], [85, 95], [95, 105], [105, 115], [115, 125], [125, 135], [135, 145], [145, 955]]
 fraclist.reverse()
 
@@ -274,6 +279,8 @@ if False:
 
 
 
+placecontigdigfh=open("/Users/security/science/transcless3ke5/place_contig_dic.pydic","r")
+placecontigdic=picke.load(placecontigdigfh)
 
 
 
@@ -291,10 +298,12 @@ ougcsv="isname,count\n"
 detailedcsv="isname,count\n"
 
 for k1 in placedi.keys():
+
     print "k"
     print k1
     addst=isinfo(k1)
     num=0
+    myloc="677_3p0"
     for i in placedi[k1]:
         print i[0]
         fe=i[0]
@@ -302,6 +311,7 @@ for k1 in placedi.keys():
         detailedcsv+=k1+","
         detailedcsv+=con.name+","
         detailedcsv+=i[2]+","
+        detailedcsv+=foundatlocation(myloc)+","
         detailedcsv+=str(fe.location.start)+","
         detailedcsv+=str(fe.location.end)+","
         detailedcsv+=str(fe.location.strand)+","
