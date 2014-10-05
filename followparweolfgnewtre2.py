@@ -117,6 +117,8 @@ def makefracstring(contl,fraclist):
     return retstring
 
 def foundatlocation(myloc,contname):
+    print contname
+    print placecontigdic[myloc].keys()
     num=placecontigdic[myloc][contname]
     return num
 
@@ -175,8 +177,8 @@ dickofice={}
 
 
 
-#for genome in getdir(args.gbfilesdir):
-if False:
+for genome in getdir(args.gbfilesdir):
+#if False:
         # are these all the subject genomes?
         genome_lendic=make_len_dic()
 
@@ -253,34 +255,34 @@ if False:
 
 
 		csvstring+=propername+","+str(genome)+","+str(hit_start)+","+str(hit_end)+","+str(len(hitseq))+","+me2+"\n"
-#print total_length
-#
-#fh=open(args.allgenomesinfo,"w")
-#fh.write(csvstring)
-#fh.close()
-#
-#print isgenomelist
-#print len(isgenomelist)
-##pifh=open("/Users/security/science/iscontiglibrary.dic","w")
-#pifh=open(args.iscontiglist,"w")
-#pickle.dump(isgenomelist,pifh)
-#
-#
-#print isdic
-#print len(isgenomelist)
-#pifh2=open(args.isdicout,"w")
-#pickle.dump(isdic,pifh2)
-#
-#pifh2=open(args.isdicout+"isdicc","w")
-#pickle.dump(dickofice,pifh2)
-#
-#
-#pifh2.close()
+print total_length
+
+fh=open(args.allgenomesinfo,"w")
+fh.write(csvstring)
+fh.close()
+
+print isgenomelist
+print len(isgenomelist)
+#pifh=open("/Users/security/science/iscontiglibrary.dic","w")
+pifh=open(args.iscontiglist,"w")
+pickle.dump(isgenomelist,pifh)
+
+
+print isdic
+print len(isgenomelist)
+pifh2=open(args.isdicout,"w")
+pickle.dump(isdic,pifh2)
+
+pifh2=open(args.isdicout+"isdicc","w")
+pickle.dump(dickofice,pifh2)
+
+
+pifh2.close()
 
 
 
 placecontigdigfh=open("/Users/security/science/transcless3ke5/place_contig_dic.pydic","r")
-placecontigdic=picke.load(placecontigdigfh)
+placecontigdic=pickle.load(placecontigdigfh)
 
 
 
@@ -290,6 +292,7 @@ prlines=pifread.split("\n")
 prlines=prlines[1:]
 
 
+#pifh3=open("/Users/security/science/transcless3ke5/isdicout.piclisdicc","r")
 pifh3=open(args.isdicout+"isdicc","r")
 placedi=pickle.load(pifh3)
 
@@ -303,7 +306,7 @@ for k1 in placedi.keys():
     print k1
     addst=isinfo(k1)
     num=0
-    myloc="677_3p0"
+    myloc=33
     for i in placedi[k1]:
         print i[0]
         fe=i[0]
@@ -311,7 +314,7 @@ for k1 in placedi.keys():
         detailedcsv+=k1+","
         detailedcsv+=con.name+","
         detailedcsv+=i[2]+","
-        detailedcsv+=foundatlocation(myloc)+","
+        detailedcsv+=str(foundatlocation(myloc,i[2]))+","
         detailedcsv+=str(fe.location.start)+","
         detailedcsv+=str(fe.location.end)+","
         detailedcsv+=str(fe.location.strand)+","

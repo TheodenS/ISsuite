@@ -69,7 +69,7 @@ for place in range(33,87):
         #print val
         #print name
         #mydic [33][contig_20004_2_3]=3 for instance
-        mydic[place][name]=val 
+        mydic[place][str(name)]=val 
         # add number of reads for this contig at this place to total
         place_totalcount+=int(val)
         # add number of reads for this contig at this place to place to csv

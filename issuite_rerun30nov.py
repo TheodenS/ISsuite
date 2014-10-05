@@ -143,6 +143,18 @@ runstring+=" -repeatsdb "+genomedbfilebase+"repsblastbase"
 print runstring
 os.system(runstring)
 
+if not os.path.isfile(place_contig_dic_location):
+#if True:
+#if not os.path.isfile(place_contig_dic_location):
+    prog="/Users/security/science/software/ISsuite/"+"treatxls.py"
+    runstring="python "+prog
+    runstring+=" -place_contig_dic="+place_contig_dic_location
+    runstring+=" -place_contig_csv="+place_contig_csv_location
+    runstring+=" -metadata_csv="+metadata_csv
+    metadata_csv
+    print runstring
+
+    os.system(runstring)
 
 #prog="/Users/security/science/software/ISsuite/"+"parse_oldnewtret2.py"
 prog="/Users/security/science/software/ISsuite/"+"followparweolfgnewtre2.py"
@@ -170,16 +182,6 @@ os.system(runstring)
 # Make dictionary with number of contigs found at each site
 # use treatxls.py
 #if True:
-if not os.path.isfile(place_contig_dic_location):
-    prog="/Users/security/science/software/ISsuite/"+"treatxls.py"
-    runstring="python "+prog
-    runstring+=" -place_contig_dic="+place_contig_dic_location
-    runstring+=" -place_contig_csv="+place_contig_csv_location
-    runstring+=" -metadata_csv="+metadata_csv
-    metadata_csv
-    print runstring
-
-    os.system(runstring)
 
 
 #if True:
@@ -219,7 +221,7 @@ os.system(runstring)
 
 prog="/Users/security/science/software/ISsuite/"+"r_ggpairs.py"
 runstring="python "+prog
-runstring+=" -in_csv="+basedir+"joinedmod.csv"
+runstring+=" -in_csv="+basedir+"joined.csv"
 runstring+=" -out="+basedir+"environmentalpairs.png"
 os.system(runstring)
 
