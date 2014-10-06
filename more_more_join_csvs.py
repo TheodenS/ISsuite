@@ -21,6 +21,22 @@ detailedrows=detailedread.split("\n")
 headline=detailedrows[0]
 detailedrows=detailedrows[1:]
 
+def get_detailed_info(contigname):
+    hcount=0
+    retrow=""
+    for detailedrow in detailedrows:
+        if detailedrow=="":
+            continue
+        splitrow=detailedrow.split(",")
+        propername=splitrow[2]
+
+        if propername==contigname:
+            hcount+=1
+            retrow=detailedrow
+    if hcount>1:
+        print retrow
+    return retrow
+
 
 
 
@@ -28,7 +44,7 @@ detailedrows=detailedrows[1:]
 dicfh=open(is_contig_place_dic_file,"r")
 is_contig_place_dic=pickle.load(dicfh)
 
-print is_contig_place_dic.keys()
+#print is_contig_place_dic.keys()
 
 book = xlrd.open_workbook(metadata_csv)
 print "the number of worksheets is", book.nsheets
@@ -45,8 +61,12 @@ print "sheet has "+str(sh.nrows)+" rows"
 outrow=""
 for row in range(1,sh.nrows):
     for col in range(0,sh.ncols):
-        print "Cell "+str(row)+","+str(col)+" is", sh.cell_value(rowx=row, colx=col)
+        raw_input()
+        #print "Cell "+str(row)+","+str(col)+" is", sh.cell_value(rowx=row, colx=col)
         outrow+=str(sh.cell_value(rowx=row, colx=col)).replace(",","_comma_")+","
+    cellinf=get_detailed_info(sh.cell_value(rowx=row, colx=0))
+    outrow+=cellinf
+        
         #print row
             #if rowc>maxrows:
 #			continue
@@ -85,7 +105,7 @@ for detailedrow in detailedrows:
     numsrow=""
     for numkey in range(33,87):
         ge=getlocation(numkey,propername)
-        print ge
+        #print ge
         numsrow+=str(ge)+","
     outcsv+=numsrow+","+detailedrow+"\n"
 

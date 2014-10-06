@@ -161,12 +161,15 @@ prog="/Users/security/science/software/ISsuite/"+"followparweolfgnewtre2.py"
 #prog="/Users/security/science/software/ISsuite/"+"newtrets2.py"
 runstring="python "+prog
 runstring+=" -gbfilesdir="+gbfilesdir
+runstring+=" -place_contig_dic="+place_contig_dic_location
 runstring+=" -allgenomesinfo="+allgenomesinfo
 runstring+=" -genomedatabase="+genomedatabase
 runstring+=" -maxeval="+str(args.maxeval)
 runstring+=" -iscontiglist="+iscontiglist
 runstring+=" -isdicout="+isdicout
 runstring+=" -iscsv="+basedir+"query_summary.csv"
+runstring+=" -iscsvlong="+basedir+"iscsvlong.csv"
+runstring+=" -iscsvdetailed="+"iscsvdetailed.csv"
 
 print runstring
 os.system(runstring)

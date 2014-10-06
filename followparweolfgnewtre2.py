@@ -133,8 +133,11 @@ parser.add_argument("-genomedatabase", help="outcsv")
 parser.add_argument("-allgenomesinfo", help="outcsv")
 parser.add_argument("-maxeval", help="outcsv")
 parser.add_argument("-iscontiglist", help="outcsv")
+parser.add_argument("-place_contig_dic", help="outcsv")
 parser.add_argument("-isdicout", help="outcsv")
 parser.add_argument("-iscsv", help="outcsv")
+parser.add_argument("-iscsvlong", help="outcsv")
+parser.add_argument("-iscsvdetailed", help="outcsv")
 args=parser.parse_args()
 
 totalreps=0
@@ -192,6 +195,7 @@ for genome in getdir(args.gbfilesdir):
         id_file_handle=open(idfilepath,"r")
         gbparse=list(SeqIO.parse(id_file_handle,"genbank"))
 	gbrecord=gbparse[0]
+
 	for feature in gbrecord.features:
 		if feature.type =="nohit":
 			continue	
@@ -281,7 +285,8 @@ pifh2.close()
 
 
 
-placecontigdigfh=open("/Users/security/science/transcless3ke5/place_contig_dic.pydic","r")
+placecontigdigfh=open(args.place_contig_dic,"r")
+#placecontigdigfh=open("/Users/security/science/transcless3ke5/place_contig_dic.pydic","r")
 placecontigdic=pickle.load(placecontigdigfh)
 
 
