@@ -11,7 +11,7 @@ def getdir(d):
 	return retlist
 
 
-endi="/Users/security/science/metagen2009/"
+endi="/Users/security/science/metagen2009_2/"
 
 if not os.path.isdir(endi):
      os.makedirs(endi)
@@ -69,11 +69,29 @@ for u in clines:
             untline="gunzip "+endi+u
             os.system(untline)
 
-            runline ="python /Users/security/science/software/ISsuiteDNA/modifyfasta_for_dna.py"
+            removeline="rm "+endi+u.replace(".fna.gz","")+".fna"
+            print removeline
+            #os.system(removeline)
+
+            runline ="python /Users/security/science/software/ISsuite/modifyfasta_for_dna.py"
             runline +=" -incsv="+endi+u.replace(".gz","")
             runline +=" -outcsv="+endi+u.replace(".gz","")+"clean"
             os.system(runline)
 
-            runline="python issuitedna.py -basedir=/Users/security/science/metagen2009/"+u.replace(".fna.gz","").replace(".fna","")+"/ -basefastafile="+endi+u.replace(".gz","")+"clean"+" -queryfastafile=/Users/security/science/RNA/ISonly3630st_less3k.fa -maxeval=0.00001"
+            removeline2="rm "+endi+u.replace(".gz","")
+            print removeline2
+            os.system(removeline2)
+
+
+            runline="python issuite_rerun30nov.py -basedir=/Users/security/science/metagen2009_2/"+u.replace(".fna.gz","").replace(".fna","")+"/ -basefastafile="+endi+u.replace(".gz","")+"clean"+" -queryfastafile=/Users/security/science/RNA/ISonly3630st_less3k.fa -maxeval=0.00001"
             print runline
             os.system(runline)
+            
+            removeline3="rm "+endi+u.replace(".gz","")+"clean"
+            os.system(removeline3)
+
+            zipline="zip "+endi+u.replace(".fna.gz","")
+            os.system(zipline)
+
+            
+
