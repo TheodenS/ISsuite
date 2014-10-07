@@ -3,17 +3,16 @@ import cPickle as pickle
 import xlrd
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-basedir", help="dirwithall")
-parser.add_argument("-basefastafile", help="dirwithall")
-parser.add_argument("-queryfastafile", help="dirwithall")
-parser.add_argument("-maxeval", help="dirwithall")
+parser.add_argument("-detailed_csvf", help="dirwithall")
+parser.add_argument("-iscsvlongf", help="dirwithall")
+parser.add_argument("-is_contig_place_dicf", help="dirwithall")
 args=parser.parse_args()
 
 detailed_csv="/Users/security/science/iscsvdetailed.csv"
 long_csv="/Users/security/science/iscsvlong.csv"
 is_contig_place_dic_file="/Users/security/science/transcless3ke5/place_contig_dic.pydic"
 
-metadata_csv="/Users/security/science/RNA/transcriptome_Theo/annotation_all.filtered.taxgrps.stats.xlsx"
+#metadata_csv="/Users/security/science/RNA/transcriptome_Theo/annotation_all.filtered.taxgrps.stats.xlsx"
 
 detailedfh=open(detailed_csv,"r")
 detailedread=detailedfh.read()
@@ -46,35 +45,35 @@ is_contig_place_dic=pickle.load(dicfh)
 
 #print is_contig_place_dic.keys()
 
-book = xlrd.open_workbook(metadata_csv)
-print "the number of worksheets is", book.nsheets
-print "Worksheet name(s):", book.sheet_names()
-sh = book.sheet_by_index(0)
-#nn=deepcopy(sh)
-#pickle.dump(nn,rh)
-#sh=pickle.load(rh)
-print sh.name, sh.nrows, sh.ncols
-print "Cell D30 is", sh.cell_value(rowx=0, colx=0)
-print "sheet has "+str(sh.nrows)+" rows"
+#book = xlrd.open_workbook(metadata_csv)
+#print "the number of worksheets is", book.nsheets
+#print "Worksheet name(s):", book.sheet_names()
+#sh = book.sheet_by_index(0)
+##nn=deepcopy(sh)
+##pickle.dump(nn,rh)
+##sh=pickle.load(rh)
+#print sh.name, sh.nrows, sh.ncols
+#print "Cell D30 is", sh.cell_value(rowx=0, colx=0)
+#print "sheet has "+str(sh.nrows)+" rows"
 
 
-outrow=""
-for row in range(1,sh.nrows):
-    for col in range(0,sh.ncols):
-        raw_input()
-        #print "Cell "+str(row)+","+str(col)+" is", sh.cell_value(rowx=row, colx=col)
-        outrow+=str(sh.cell_value(rowx=row, colx=col)).replace(",","_comma_")+","
-    cellinf=get_detailed_info(sh.cell_value(rowx=row, colx=0))
-    outrow+=cellinf
-        
-        #print row
-            #if rowc>maxrows:
-#			continue
-        #rowc+=1
-        #if place<sh.ncols:
-        #val=sh.cell_value(rowx=row, colx=col)
-        #name=sh.cell_value(rowx=row, colx=0)
-    outrow+="\n"
+#outrow=""
+#for row in range(1,sh.nrows):
+#    for col in range(0,sh.ncols):
+#        raw_input()
+#        #print "Cell "+str(row)+","+str(col)+" is", sh.cell_value(rowx=row, colx=col)
+#        outrow+=str(sh.cell_value(rowx=row, colx=col)).replace(",","_comma_")+","
+#    cellinf=get_detailed_info(sh.cell_value(rowx=row, colx=0))
+#    outrow+=cellinf
+#        
+#        #print row
+#            #if rowc>maxrows:
+##			continue
+#        #rowc+=1
+#        #if place<sh.ncols:
+#        #val=sh.cell_value(rowx=row, colx=col)
+#        #name=sh.cell_value(rowx=row, colx=0)
+#    outrow+="\n"
 
 
 
@@ -113,8 +112,8 @@ outfh=open("/Users/security/science/5oct.csv","w")
 outfh.write(outcsv)
 
 
-outfh=open("/Users/security/science/5oct2.csv","w")
-outfh.write(outrow)
+#outfh=open("/Users/security/science/5oct2.csv","w")
+#outfh.write(outrow)
 
 
 

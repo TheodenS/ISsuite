@@ -118,12 +118,13 @@ def makefracstring(contl,fraclist):
 
 def foundatlocation(myloc,contname):
     print contname
-    print placecontigdic[myloc].keys()
-    num=placecontigdic[myloc][contname]
+    num="NONE"
+    if contname in placecontigdic[myloc].keys():
+        num=placecontigdic[myloc][contname]
     return num
 
 
-fraclist=[[0, 5], [5, 15], [15, 25], [25, 35], [35, 45], [45, 55], [55, 65], [65, 75], [75, 85], [85, 95], [95, 105], [105, 115], [115, 125], [125, 135], [135, 145], [145, 955]]
+fraclist=[[0, 5], [5, 15], [15, 25], [25, 35], [35, 45], [45, 55], [55, 65], [65, 75], [75, 85], [85, 95], [95, 105], [105, 115], [115, 955]]
 fraclist.reverse()
 
 
@@ -335,10 +336,12 @@ for k1 in placedi.keys():
     print num
     ougcsv+=k1+","+str(num)+addst.replace("\t",",")+"\n"
 
-tfh=open("/Users/security/science/iscsvlong.csv","w")
+tfh=open(args.iscsvlong,"w")
+#tfh=open("/Users/security/science/iscsvlong.csv","w")
 tfh.write(ougcsv)
 
-tfh2=open("/Users/security/science/iscsvdetailed.csv","w")
+tfh2=open(args.iscsvdetailed,"w")
+#tfh2=open("/Users/security/science/iscsvdetailed.csv","w")
 tfh2.write(detailedcsv)
 
 

@@ -54,7 +54,8 @@ queryfastafile=genomefasta_dir+"queries.fa"
 genomedatabase_dir=basedir+"databases/"
 genomedatabase=genomedatabase_dir+"genomeinfo.db"
 gbfilesdir=basedir+"gb_files/"
-place_contig_dic_location=basedir+"place_contig_dic.pydic"
+place_contig_dic_location=basedir+"/Users/security/science/place_contig_dic.pydic"
+#place_contig_dic_location=basedir+"place_contig_dic.pydic"
 place_contig_csv_location=basedir+"place_contig_csv.csv"
 iscounts_contigcsv=basedir+"iscounts_contigcsv.csv"
 allgenomesinfo=basedir+"allgenomesinfo.csv"
@@ -121,7 +122,7 @@ runstring="python "+prog+" -genomeblastdb "+genomedbfilebase+" -blastlocation "+
 runstring+=" -queryfile " + args.queryfastafile
 runstring+=" -genomefasta " +genomefasta_dir+"renamed.fa" 
 
-os.system(runstring)
+#os.system(runstring)
 
 report("ran blast_reps_vs_genomes_fasta.py\n",text_results_file)
 
@@ -132,7 +133,7 @@ runstring="python "+prog+" -blastoutput "+contigxmlresultspath
 runstring+=" -gbfilesdir "+gbfilesdir
 runstring+=" -evalue "+str(args.maxeval)
 runstring+=" -genomedb "+genomedatabase
-os.system(runstring)
+#os.system(runstring)
 
 
 prog="/Users/security/science/software/ISsuite/"+"id_gb_strings.py"
@@ -141,7 +142,7 @@ runstring="python "+prog+" -gbfiles "+gbfilesdir +" -tempfile "+helperfiles_dir+
 runstring+=" -repsfa "+args.queryfastafile
 runstring+=" -repeatsdb "+genomedbfilebase+"repsblastbase"
 print runstring
-os.system(runstring)
+#os.system(runstring)
 
 if not os.path.isfile(place_contig_dic_location):
 #if True:
@@ -169,7 +170,7 @@ runstring+=" -iscontiglist="+iscontiglist
 runstring+=" -isdicout="+isdicout
 runstring+=" -iscsv="+basedir+"query_summary.csv"
 runstring+=" -iscsvlong="+basedir+"iscsvlong.csv"
-runstring+=" -iscsvdetailed="+"iscsvdetailed.csv"
+runstring+=" -iscsvdetailed="+basedir+"iscsvdetailed.csv"
 
 print runstring
 os.system(runstring)
@@ -227,6 +228,14 @@ runstring="python "+prog
 runstring+=" -in_csv="+basedir+"joined.csv"
 runstring+=" -out="+basedir+"environmentalpairs.png"
 os.system(runstring)
+
+prog="/Users/security/science/software/ISsuite/"+"more_more_join_csvs.py"
+runstring="python "+prog
+runstring+=" -detailed_csvf="+basedir+"iscsvdetailed.csv"
+runstring+=" -iscsvlongf="+basedir+"iscsvlong.csv"
+runstring+=" -is_contig_place_dicf="+place_contig_dic_location
+os.system(runstring)
+
 
 quit()
 

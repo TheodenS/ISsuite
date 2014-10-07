@@ -40,26 +40,33 @@ clines=cread.split("\n")
 
 
 notlit=[]
+count=0
 for u in clines:
     if u=="":
         continue
     dones=getdir(endi)
+    print dones
 
 
     ufoldername=u.replace(".fna.gz","")
-    uzipname=u.replace(".fna.gz",".zip")
-    if ufoldername in dones:
+    uzipname=u.replace(".fna.gz","_done.tar.gz")
+    print uzipname
+    if uzipname in dones:
         continue
         
         #print ufoldername+" was in dones"
         #print u+"already done"
     else:
+        count+=1
+        if count>1:
+            continue
         print ufoldername+" was NOT in dones"
 
-        if uzipname in dones:
-            pass
+   #     if uzipname in dones:
+        if True:
+   #         pass
             #print u+"in ZIP already done"
-        else:
+        #else:
             print "nondone"
             print u
             print "nondone"
@@ -88,10 +95,14 @@ for u in clines:
             os.system(runline)
             
             removeline3="rm "+endi+u.replace(".gz","")+"clean"
+            print removeline3
             os.system(removeline3)
 
-            zipline="zip "+endi+u.replace(".fna.gz","")
+            zipline="tar -czf "+endi+u.replace(".fna.gz","")+"_done.tar.gz "+endi+u.replace(".fna.gz","")
+            print zipline
             os.system(zipline)
 
+            remline="rm -R "+endi+u.replace(".fna.gz","")
+            os.system(remline)
             
 
