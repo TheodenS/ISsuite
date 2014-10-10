@@ -58,8 +58,6 @@ for u in clines:
         #print u+"already done"
     else:
         count+=1
-        if count>1:
-            continue
         print ufoldername+" was NOT in dones"
 
    #     if uzipname in dones:
@@ -90,7 +88,7 @@ for u in clines:
             os.system(removeline2)
 
 
-            runline="python issuite_rerun30nov.py -basedir=/Users/security/science/metagen2009_2/"+u.replace(".fna.gz","").replace(".fna","")+"/ -basefastafile="+endi+u.replace(".gz","")+"clean"+" -queryfastafile=/Users/security/science/RNA/ISonly3630st_less3k.fa -maxeval=0.00001"
+            runline="python /Users/security/science/software/ISsuite/issuit_many.py -basedir=/Users/security/science/metagen2009_2/"+u.replace(".fna.gz","").replace(".fna","")+"/ -basefastafile="+endi+u.replace(".gz","")+"clean"+" -queryfastafile=/Users/security/science/RNA/ISonly3630st_less3k.fa -maxeval=0.00001"
             print runline
             os.system(runline)
             

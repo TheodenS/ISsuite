@@ -1,4 +1,4 @@
-
+#parser.add_argument("-place_contig_dic", help="outcsv")
 import argparse
 
 ccresfile="/Users/security/science/ccc2.csv"

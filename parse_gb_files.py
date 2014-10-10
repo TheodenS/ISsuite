@@ -130,16 +130,29 @@ fraclist.reverse()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-gbfilesdir", help="outcsv")
+parser.add_argument("-place_contig_dic", help="outcsv")
 parser.add_argument("-genomedatabase", help="outcsv")
-parser.add_argument("-allgenomesinfo", help="outcsv")
+parser.add_argument("-contigs_with_is_csv", help="outcsv")
 parser.add_argument("-maxeval", help="outcsv")
 parser.add_argument("-iscontiglist", help="outcsv")
-parser.add_argument("-place_contig_dic", help="outcsv")
 parser.add_argument("-isdicout", help="outcsv")
 parser.add_argument("-iscsv", help="outcsv")
 parser.add_argument("-iscsvlong", help="outcsv")
 parser.add_argument("-iscsvdetailed", help="outcsv")
 args=parser.parse_args()
+
+
+
+# -gbfilesdir=gbfilesdir
+# -place_contig_dic=place_contig_dic_location
+# -contigs_with_is_csv=contigs_with_is_csv
+# -genomedatabase="+genomedatabase
+# -maxeval="+str(args.maxeval)
+# -iscontiglist="+iscontiglist
+# -isdicout="+isdicout
+# -iscsv="+basedir+"query_summary.csv"
+# -iscsvlong="+basedir+"iscsvlong.csv"
+# -iscsvdetailed="+basedir+"iscsvdetailed.csv"
 
 totalreps=0
 total_length=0
@@ -151,20 +164,8 @@ total_length=0
 con2 = sqlite3.connect(args.genomedatabase)
 cur2 = con2.cursor()  
 
-csvstring="name,myid,start,end,hitlen,evalue,"+makelengthheadline(fraclist)+"\n"
+csvstring="name,myid,isname,start,end,hitlen,evalue,seq"+makelengthheadline(fraclist)+"\n"
 
-# investigation wide info
-inv_n_allf=0
-inv_n_nohit=0
-inv_n_repeathit=0
-inv_n_footprint=0
-inv_n_notfound=0
-inv_n_treated=0
-inv_n_is=0
-inv_n_mge=0
-inv_n_phage=0
-inv_n_putative=0
-inv_n_dna=0
 
 # For looking up lenghths of ISs
 tempIS_csv_handle=open(args.iscsv,"r")
@@ -189,10 +190,6 @@ for genome in getdir(args.gbfilesdir):
         # are these all the subject genomes?
         genome_lendic=make_len_dic()
 
-	# Genome wide info
-
-	#print genome
-	#print getsa(genome.replace(".gb",""))
 	propername=getsa(genome.replace(".gb",""))
 	id_gb_location=args.gbfilesdir
         idfilepath=id_gb_location+genome
@@ -223,6 +220,11 @@ for genome in getdir(args.gbfilesdir):
                     if not propername in isgenomelist:
                         isgenomelist.append(propername)
                     istype=str(feature.type)
+
+    
+
+                    # Construct dictionary by istype
+
                     if istype in isdic.keys():
                         isdic[istype]+=1
                         dickofice[istype].append([feature,gbrecord,propername])
@@ -251,15 +253,12 @@ for genome in getdir(args.gbfilesdir):
 		genome_lendic=plusfrac(genome_lendic,len(hitseq),islent,fraclist)
                 me2= makefracstring(genome_lendic,fraclist)
 
-		csvstring+=propername+","+str(genome.replace(".gb",""))+","+str(hit_start)+","+str(hit_end)+","+str(len(hitseq))+","+str(evalue)+","+str(hitseq)+me2+"\n"
-print total_length
+		csvstring+=propername+","+str(genome.replace(".gb",""))+","+feature.type+","+str(hit_start)+","+str(hit_end)+","+str(len(hitseq))+","+str(evalue)+","+str(hitseq)+me2+"\n"
 
-fh=open(args.allgenomesinfo,"w")
+fh=open(args.contigs_with_is_csv,"w")
 fh.write(csvstring)
 fh.close()
 
-print isgenomelist
-print len(isgenomelist)
 #pifh=open("/Users/security/science/iscontiglibrary.dic","w")
 pifh=open(args.iscontiglist,"w")
 pickle.dump(isgenomelist,pifh)
@@ -312,7 +311,7 @@ for k1 in placedi.keys():
         detailedcsv+=k1+","
         detailedcsv+=con.name+","
         detailedcsv+=i[2]+","
-        detailedcsv+=str(foundatlocation(myloc,i[2]))+","
+        #detailedcsv+=str(foundatlocation(myloc,i[2]))+","
         detailedcsv+=str(fe.location.start)+","
         detailedcsv+=str(fe.location.end)+","
         detailedcsv+=str(fe.location.strand)+","

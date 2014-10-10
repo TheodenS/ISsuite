@@ -294,17 +294,3 @@ for gen in genomesdic.keys():
 	gbrecord_fh=open(first_hits_gb_record_file,"w")
 	SeqIO.write([newrec],gbrecord_fh,"genbank")
 	gbrecord_fh.close()
-# End of genomesdic
-
-print "num of gens in dic treated"
-print gen_in_genomesdic
-
-
-
-
-
-print hitcount
-print len(genomesdic.keys())
-
-#logfh.write(text_log)
-#logfh.close()

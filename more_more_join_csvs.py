@@ -5,16 +5,20 @@ import xlrd
 parser = argparse.ArgumentParser()
 parser.add_argument("-detailed_csvf", help="dirwithall")
 parser.add_argument("-iscsvlongf", help="dirwithall")
-parser.add_argument("-is_contig_place_dicf", help="dirwithall")
+parser.add_argument("-outcsv", help="dirwithall")
 args=parser.parse_args()
 
-detailed_csv="/Users/security/science/iscsvdetailed.csv"
-long_csv="/Users/security/science/iscsvlong.csv"
-is_contig_place_dic_file="/Users/security/science/transcless3ke5/place_contig_dic.pydic"
+#detailed_csv="/Users/security/science/iscsvdetailed.csv"
+#long_csv="/Users/security/science/iscsvlong.csv"
+#is_contig_place_dic_file=args.detailed_csvf
+is_contig_place_dic_file="/Users/security/science/place_contig_dic.pydic"
 
 #metadata_csv="/Users/security/science/RNA/transcriptome_Theo/annotation_all.filtered.taxgrps.stats.xlsx"
 
-detailedfh=open(detailed_csv,"r")
+
+#iscsvdetailed.csv
+
+detailedfh=open(args.detailed_csvf,"r")
 detailedread=detailedfh.read()
 detailedrows=detailedread.split("\n")
 headline=detailedrows[0]
@@ -33,7 +37,7 @@ def get_detailed_info(contigname):
             hcount+=1
             retrow=detailedrow
     if hcount>1:
-        print retrow
+        print retrow +" has more than one detailed row"
     return retrow
 
 
@@ -82,8 +86,8 @@ placelist=["GS675_3p0", "GS675_0p8", "GS675_0p1", "GS676_3p0", "GS676_0p8","GS67
 
 def getlocation(placenum,contig):
     #print is_contig_place_dic[placenum].keys()
-    if contig in is_contig_place_dic[placenum]:
-        return is_contig_place_dic[placenum][contig.decode('unicode-escape')]
+    if contig in is_contig_place_dic[placenum].keys():
+        return is_contig_place_dic[placenum][contig]
     else:
         return 0
 
@@ -95,24 +99,30 @@ for ey in range(33,87):
     outcsv+=placelist[nameidx]+","
 outcsv+=headline+"\n"
 
+# for row in iscsvdetailed.csv
 for detailedrow in detailedrows:
+    #print "detailedrow"
+    #print detailedrow
     if detailedrow=="":
         continue
     numkey=33
     splitrow=detailedrow.split(",")
+    # get propername
     propername=splitrow[2]
     numsrow=""
     for numkey in range(33,87):
+        # get numbers for contig,place
         ge=getlocation(numkey,propername)
         #print ge
         numsrow+=str(ge)+","
     outcsv+=numsrow+","+detailedrow+"\n"
 
-outfh=open("/Users/security/science/5oct.csv","w")
+outfh=open(args.outcsv,"w")
 outfh.write(outcsv)
 
 
-#outfh=open("/Users/security/science/5oct2.csv","w")
+#outfh=open("/Users/security/science/5oct2_teat.csv","w")
+#outfh=open("/Users/security/science/5oct2","w")
 #outfh.write(outrow)
 
 

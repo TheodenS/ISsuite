@@ -75,7 +75,7 @@ for detailedrow in detailedrows:
     nameidx=numkey-33
     placename=placelist[nameidx]
 
-outfh=open("/Users/security/science/5octlong.csv","w")
+outfh=open("/Users/security/science/5octlong3.csv","w")
 outfh.write(outcsv)
 
 

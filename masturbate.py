@@ -34,7 +34,6 @@ csvout=""
 print len(di.keys())
 print len(range(33,87))
 for numkey in range(33,87):
-    print numkey
 
     # place with list of transcripts, and their number of hits 
     placedic=di[numkey]

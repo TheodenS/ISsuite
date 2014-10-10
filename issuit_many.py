@@ -58,8 +58,7 @@ place_contig_dic_location="/Users/security/science/place_contig_dic.pydic"
 #place_contig_dic_location=basedir+"place_contig_dic.pydic"
 place_contig_csv_location=basedir+"place_contig_csv.csv"
 iscounts_contigcsv=basedir+"iscounts_contigcsv.csv"
-#allgenomesinfo=basedir+"allgenomesinfo.csv"
-contigs_with_is_csv=basedir+"contigs_with_is.csv"
+allgenomesinfo=basedir+"allgenomesinfo.csv"
 foundishistogram=basedir+"foundis_histogram.eps"
 joinedcsv=basedir+"joined.csv"
 iscontiglist=basedir+"iscontiglist.picl"
@@ -98,47 +97,43 @@ if not os.path.isfile(queryfastafile):
 # Make genome database and a renamed fasta file
 if not os.path.isfile(genomedatabase):
         cmstr="python /Users/security/science/software/ISsuite/make_genomedb_and_renamed_fasta.py -fastafile="+genomefastafile+" -databasefile="+genomedatabase+" -databasename="+"genomeinfo" +" -renamedfastafile="+genomefasta_dir+"renamed.fa"+" -sbjct_summary_csv="+basedir+"subject_summary.csv"
-        print "making contig info database and renamed fasta file (propername->myid) "+genomedatabase
         os.system(cmstr)
 
 # Make csv summarizying query
 if not os.path.isfile(basedir+"query_summary.csv"):
     cmstr_querycsv="python /Users/security/science/software/ISsuite/make_query_csv.py -fastafile="+queryfastafile+" -query_summary_csv="+basedir+"query_summary.csv"
     os.system(cmstr_querycsv)
-    print "Made csv file for queries"
 
 if not os.path.isfile(basedir+"query_histogram.pdf"):
     cmd_make_query_fasta="python /Users/security/science/software/ISsuite/makehistogram.py -in_csv="+basedir+"query_summary.csv"+" -out="+basedir+"query_histogram.pdf"
     os.system(cmd_make_query_fasta)
-    print "making histogram of queries"
 
 if not os.path.isfile(basedir+"subject_histogram.pdf"):
     cmd_make_sbjct_fasta="python /Users/security/science/software/ISsuite/makehistogram.py -in_csv="+basedir+"subject_summary.csv"+" -out="+basedir+"subject_histogram.pdf"
-    print "making historgram of subject seqs"
     os.system(cmd_make_sbjct_fasta)
 
 
+prog="/Users/security/science/software/ISsuite/"+"blast_query_vs_sbject.py"
+
 resultname="rvg"
 contigxmlresultspath=blast_output_location+resultname+".xml"
-prog="/Users/security/science/software/ISsuite/"+"blast_query_vs_sbject.py"
-if not os.path.isfile(blast_output_location+resultname+".xml"):
-    runstring="python "+prog+" -genomeblastdb "+genomedbfilebase+" -blastlocation "+blastlocation+" -blastoutput "+contigxmlresultspath+" -evalue "+str(float(args.maxeval)*10)
-    runstring+=" -queryfile " + args.queryfastafile
-    runstring+=" -genomefasta " +genomefasta_dir+"renamed.fa" 
-    print "running blast outputting "+blast_output_location+resultname+".xml"
-    #os.system(runstring)
 
-    report("ran blast_reps_vs_genomes_fasta.py\n",text_results_file)
+runstring="python "+prog+" -genomeblastdb "+genomedbfilebase+" -blastlocation "+blastlocation+" -blastoutput "+contigxmlresultspath+" -evalue "+str(float(args.maxeval)*10)
+runstring+=" -queryfile " + args.queryfastafile
+runstring+=" -genomefasta " +genomefasta_dir+"renamed.fa" 
 
+os.system(runstring)
 
+report("ran blast_reps_vs_genomes_fasta.py\n",text_results_file)
 
 prog="/Users/security/science/software/ISsuite/"+"parse_qu_vs_sb_to_gbstring.py"
+
 
 runstring="python "+prog+" -blastoutput "+contigxmlresultspath
 runstring+=" -gbfilesdir "+gbfilesdir
 runstring+=" -evalue "+str(args.maxeval)
 runstring+=" -genomedb "+genomedatabase
-#os.system(runstring)
+os.system(runstring)
 
 
 prog="/Users/security/science/software/ISsuite/"+"id_gb_strings.py"
@@ -147,30 +142,27 @@ runstring="python "+prog+" -gbfiles "+gbfilesdir +" -tempfile "+helperfiles_dir+
 runstring+=" -repsfa "+args.queryfastafile
 runstring+=" -repeatsdb "+genomedbfilebase+"repsblastbase"
 print runstring
-#os.system(runstring)
+os.system(runstring)
 
 #if not os.path.isfile(place_contig_dic_location):
-#if True:
-if not os.path.isfile(place_contig_dic_location):
+if True:
+#if not os.path.isfile(place_contig_dic_location):
     prog="/Users/security/science/software/ISsuite/"+"treatxls.py"
     runstring="python "+prog
     runstring+=" -place_contig_dic="+place_contig_dic_location
     runstring+=" -place_contig_csv="+place_contig_csv_location
     runstring+=" -metadata_csv="+metadata_csv
     print runstring
-    os.system(runstring)
 
+    #os.system(runstring)
 
-# outputs detainledcsv, with
-#detailedcsv="isname,abbcontig,propercontig,loc_start,loc_end,loc_strand,score,expected,sbjct_start,sbject_end,sbjctseq,queryseq\n"
-# islongcsv is a csv with extra is information, from isfinder
-# iscontiglist, a list of contigs with ISs in them
-# isdicout, an isname-keyed dic with feature, gbrecord, name of contig
-prog="/Users/security/science/software/ISsuite/"+"parse_gb_files.py"
+#prog="/Users/security/science/software/ISsuite/"+"parse_oldnewtret2.py"
+prog="/Users/security/science/software/ISsuite/"+"followparweolfgnewtre2.py"
+#prog="/Users/security/science/software/ISsuite/"+"newtrets2.py"
 runstring="python "+prog
 runstring+=" -gbfilesdir="+gbfilesdir
 runstring+=" -place_contig_dic="+place_contig_dic_location
-runstring+=" -contigs_with_is_csv="+contigs_with_is_csv
+runstring+=" -allgenomesinfo="+allgenomesinfo
 runstring+=" -genomedatabase="+genomedatabase
 runstring+=" -maxeval="+str(args.maxeval)
 runstring+=" -iscontiglist="+iscontiglist
@@ -185,19 +177,17 @@ os.system(runstring)
 
 prog="/Users/security/science/software/ISsuite/"+"foundislengthhistogram.py"
 runstring="python "+prog 
-runstring+=" -in_csv "+contigs_with_is_csv
+runstring+=" -in_csv "+allgenomesinfo
 runstring+=" -out "+foundishistogram
 os.system(runstring)
 
 
 # Make dictionary with number of contigs found at each site
 # use treatxls.py
+#if True:
 
 
-
-# outputs list with (numkey)+","+placename+","+dsp[0]+","+dsp[1]+","+str(readscount)+","+str(iscount)+","+str(isfrac)+"\n"
-#as iscounts_contigcsv.csv
-# 
+#if True:
 if not os.path.isfile(iscounts_contigcsv):
 #if not os.path.isfile("/Users/security/science/ccc2.csv"):
     #prog="/Users/security/science/software/ISsuite/"+"count_no_transcripts.py"
@@ -209,8 +199,6 @@ if not os.path.isfile(iscounts_contigcsv):
     print runstring
     os.system(runstring)
 
-
-#prodcuces csv joined.csv,with environmental data added to stations
 prog="/Users/security/science/software/ISsuite/"+"join_csvs.py"
 runstring="python "+prog
 runstring+=" -iscounts_contigcsv="+iscounts_contigcsv
@@ -222,8 +210,8 @@ os.system(runstring)
 prog="/Users/security/science/software/ISsuite/"+"modify_csv_joindepths.py"
 runstring="python "+prog
 runstring+=" -incsv="+joinedcsv
-runstring+=" -outcsv="+joinedcsv+"-joinedfilters.csv"
-os.system(runstring)
+runstring+=" -outcsv="+joinedcsv+"m.csv"
+#os.system(runstring)
 
 
 
@@ -232,80 +220,29 @@ runstring="python "+prog
 runstring+=" -in_csv="+joinedcsv
 runstring+=" -in_csv_all="+joinedcsv+"m.csv"
 runstring+=" -out="+basedir+"plt.pdf"
-os.system(runstring)
+#os.system(runstring)
 
 prog="/Users/security/science/software/ISsuite/"+"r_ggpairs.py"
 runstring="python "+prog
 runstring+=" -in_csv="+basedir+"joined.csv"
 runstring+=" -out="+basedir+"environmentalpairs.png"
-os.system(runstring)
+#os.system(runstring)
 
-
-
-
-
-contigs_with_is_count_csv=basedir+"contigs_with_is_count.csv"
-
-
-
-# outputs list with contigs with ISs in them.
 prog="/Users/security/science/software/ISsuite/"+"more_more_join_csvs.py"
 runstring="python "+prog
 runstring+=" -detailed_csvf="+basedir+"iscsvdetailed.csv"
 runstring+=" -iscsvlongf="+basedir+"iscsvlong.csv"
-runstring+=" -outcsv="+contigs_with_is_count_csv
-
+runstring+=" -is_contig_place_dicf="+place_contig_dic_location
 #os.system(runstring)
 
-prog="/Users/security/science/software/ISsuite/"+"moremoremorejoincsv.py"
-runstring="python "+prog
-runstring+=" -detailed_csvf="+basedir+"iscsvdetailed.csv"
-runstring+=" -iscsvlongf="+basedir+"iscsvlong.csv"
-runstring+=" -contigxls_isinfo_join_csv="+basedir+"fullist.csv"
 
-print runstring
-
-os.system(runstring)
-raw_input("3more done")
-# joins list of iscontigs with is hits to extra info about is
-# used to output 5oct2-2.csv" 
-prog="/Users/security/science/software/ISsuite/"+"join_is_info_to_results.py"
-runstring="python "+prog
-runstring+=" -is_contigs_count_csv="+basedir+"fullist.csv"
-#runstring+=" -is_contigs_count_csv="+contigs_with_is_count_csv
-runstring+=" -long_csv="+basedir+"iscsvlong.csv"
-runstring+=" -out_csv_allcontigs_is_long="+basedir+"out_csv_allcontigs_is_long.csv"
-print runstring
-#os.system(runstring)
-
-# Makes directories with info per organism group
-# takes5oct2-2.csv"as input 
-prog="/Users/security/science/software/ISsuite/"+"dna_per_organism.py"
-runstring="python "+prog
-runstring+=" -is_contigs_count_csv="+basedir+"fullist.csv"
-#runstring+=" -is_contigs_count_csv="+contigs_with_is_count_csv
-runstring+=" -group_out_dir="+"bactgroups"
-#os.system(runstring)
-
-#takes science/5oct2-2.csv as input
-prog="/Users/security/science/software/ISsuite/"+"get_transcripts_orgn_place.py"
-runstring="python "+prog
-runstring+=" -is_contigs_count_csv="+basedir+"fullist.csv"
-runstring+=" -is_per_group_csv="+basedir+"is_groups.csv"
-print runstring
-#os.system(runstring)
-
-prog="/Users/security/science/software/ISsuite/"+"r_bars_normalized_location_groups.py"
-#runstring="python "+prog
-runstring+=" -in_csv="+basedir+"is_groups.csv"
-runstring+=" -out="+basedir+"group_frequencies.pdf"
-#os.system(runstring)
-
+quit()
 
 
 
 
 print "finished program"
+
 
 
 
