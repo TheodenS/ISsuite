@@ -3,7 +3,8 @@ from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
-import argparse
+import ar#gparse
+iiscsvdetailed.csv
 import xlrd
 import sqlite3
 import rpy2.robjects as robjects
@@ -135,13 +136,13 @@ onlyfilts=robjects.r('onlyfilt<-subset(datass,filtersize %in% c("0p1","0p8","3p0
 onlysurf=robjects.r('onlyfilt2<-subset(datass,Sampledepth %in% c("0p1","0.30487806"))')
 #onlysurfno=robjects.r('onlyfilt2<-')
 #onlysurf=robjects.r('onlysurface<-onlyfilt[ which("Sampledepth" =="0.30487806"),]')
-print "onlysurf"
-print onlysurf
+#print "onlysurf"
+#print onlysurf
 
 #colours2 = grdevices.topo_colors(10)
 colours2 = grdevices.cm_colors(10)
 #colours2 = grdevices.rainbow(20)
-print colours2
+#print colours2
 #colours = ggplot2.rainbow(54)
 #bins=10
 gp = ggplot2.ggplot(onlysurf)
@@ -167,9 +168,9 @@ pp.plot()
 robjects.r.ggsave((str(args.out).replace(".pdf",""))+"map.pdf")
 
 onlyfiltxxx=robjects.r('onl<-subset(datass1,filtersize %in% c("0p1","0p8","3p0"))')
-print "here is"
-print robjects.r('print(datass1)')
-print "there was"
+#print "here is"
+#print robjects.r('print(datass1)')
+#print "there was"
 '''
 ggplot2.scale_x_continuous(name=xlabel,breaks=scales.pretty_breaks(20)) +\
 ggplot2.scale_y_continuous(labels=scales.comma,name=ylabel,breaks=scales.pretty_breaks(10))+ ggplot2.theme(title=ggplot2.element_text(colour="blue",face="bold"))''' 
@@ -187,4 +188,4 @@ barsdata.plot()
 robjects.r.ggsave((str(args.out).replace(".pdf",""))+"oth.pdf")
 
 
-dataframe=robjects.r('mydata <- read.delim("/Users/security/science/transcless3ke5/joined_all.csv", sep="," , header=TRUE)')
+#dataframe=robjects.r('mydata <- read.delim("/Users/security/science/transcless3ke5/joined_all.csv", sep="," , header=TRUE)')

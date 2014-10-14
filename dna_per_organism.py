@@ -80,7 +80,7 @@ for row in datarows:
         #print str(tabrow[87])
     if len(tabrow)<21:
         print tabrow
-        raw_input()
+        #raw_input()
     if grp in csvs.keys():
         print grp
         csvs[grp]+=row+"\n"

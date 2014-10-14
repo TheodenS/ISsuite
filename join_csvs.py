@@ -16,7 +16,7 @@ metalines=metaread.split("\n")
 metalines=metalines[1:]
 
 ccresfile=args.iscounts_contigcsv
-print ccresfile
+#print ccresfile
 
 cfh=open(ccresfile,"r")
 cread=cfh.read()
@@ -39,9 +39,9 @@ def getfromcc(name):
         if me1name==name:
             for m in lintabs:
                 acsv+=str(m)+","
-            print acsv
+            #print acsv
             new=acsv[:-1]
-            print new
+            #print new
             return new 
     return badst 
 

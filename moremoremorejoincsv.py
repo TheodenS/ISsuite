@@ -28,7 +28,7 @@ print "done reading csv:"+ detailed_csv
 
 
 
-def get_detailed_info(contigname):
+def get_detailed_info(contigname):  
     hcount=0
     retrow=""
     for detailedrow in detailedrows:
@@ -40,7 +40,8 @@ def get_detailed_info(contigname):
         if propername==contigname:
             hcount+=1
             retrow=detailedrow
-    return retrow
+            return retrow
+    return ",,,,,,"
 
 
 

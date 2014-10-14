@@ -105,7 +105,7 @@ def isinfo(issname):
         myn=ltas[1]
         if ltas[1]==issname:
             return l
-    raw_input(issname)
+    #raw_input(issname)
 
 
 

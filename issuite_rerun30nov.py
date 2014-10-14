@@ -126,7 +126,7 @@ if not os.path.isfile(blast_output_location+resultname+".xml"):
     runstring+=" -queryfile " + args.queryfastafile
     runstring+=" -genomefasta " +genomefasta_dir+"renamed.fa" 
     print "running blast outputting "+blast_output_location+resultname+".xml"
-    #os.system(runstring)
+    os.system(runstring)
 
     report("ran blast_reps_vs_genomes_fasta.py\n",text_results_file)
 
@@ -180,7 +180,7 @@ runstring+=" -iscsvlong="+basedir+"iscsvlong.csv"
 runstring+=" -iscsvdetailed="+basedir+"iscsvdetailed.csv"
 
 print runstring
-os.system(runstring)
+#os.system(runstring)
 
 
 prog="/Users/security/science/software/ISsuite/"+"foundislengthhistogram.py"
@@ -207,7 +207,7 @@ if not os.path.isfile(iscounts_contigcsv):
     #runstring+=" -database="+"/Users/security/science/trydic2.csv"
     runstring+=" -outcsv="+iscounts_contigcsv
     print runstring
-    os.system(runstring)
+    #os.system(runstring)
 
 
 #prodcuces csv joined.csv,with environmental data added to stations
@@ -217,28 +217,32 @@ runstring+=" -iscounts_contigcsv="+iscounts_contigcsv
 runstring+=" -outcsv="+joinedcsv
 print runstring
 
-os.system(runstring)
+#os.system(runstring)
 
 prog="/Users/security/science/software/ISsuite/"+"modify_csv_joindepths.py"
 runstring="python "+prog
 runstring+=" -incsv="+joinedcsv
 runstring+=" -outcsv="+joinedcsv+"-joinedfilters.csv"
-os.system(runstring)
+#os.system(runstring)
+print runstring
 
 
 
 prog="/Users/security/science/software/ISsuite/"+"r_environgraph.py"
 runstring="python "+prog
 runstring+=" -in_csv="+joinedcsv
-runstring+=" -in_csv_all="+joinedcsv+"m.csv"
+#runstring+=" -in_csv_all="+joinedcsv+"m.csv"
+runstring+=" -in_csv_all="+joinedcsv+"-joinedfilters.csv"
 runstring+=" -out="+basedir+"plt.pdf"
-os.system(runstring)
+#os.system(runstring)
+print runstring
 
 prog="/Users/security/science/software/ISsuite/"+"r_ggpairs.py"
 runstring="python "+prog
 runstring+=" -in_csv="+basedir+"joined.csv"
 runstring+=" -out="+basedir+"environmentalpairs.png"
-os.system(runstring)
+#os.system(runstring)
+print runstring
 
 
 
@@ -255,6 +259,7 @@ runstring+=" -detailed_csvf="+basedir+"iscsvdetailed.csv"
 runstring+=" -iscsvlongf="+basedir+"iscsvlong.csv"
 runstring+=" -outcsv="+contigs_with_is_count_csv
 
+print runstring
 #os.system(runstring)
 
 prog="/Users/security/science/software/ISsuite/"+"moremoremorejoincsv.py"
@@ -266,7 +271,6 @@ runstring+=" -contigxls_isinfo_join_csv="+basedir+"fullist.csv"
 print runstring
 
 os.system(runstring)
-raw_input("3more done")
 # joins list of iscontigs with is hits to extra info about is
 # used to output 5oct2-2.csv" 
 prog="/Users/security/science/software/ISsuite/"+"join_is_info_to_results.py"
@@ -276,7 +280,7 @@ runstring+=" -is_contigs_count_csv="+basedir+"fullist.csv"
 runstring+=" -long_csv="+basedir+"iscsvlong.csv"
 runstring+=" -out_csv_allcontigs_is_long="+basedir+"out_csv_allcontigs_is_long.csv"
 print runstring
-#os.system(runstring)
+os.system(runstring)
 
 # Makes directories with info per organism group
 # takes5oct2-2.csv"as input 
@@ -285,6 +289,7 @@ runstring="python "+prog
 runstring+=" -is_contigs_count_csv="+basedir+"fullist.csv"
 #runstring+=" -is_contigs_count_csv="+contigs_with_is_count_csv
 runstring+=" -group_out_dir="+"bactgroups"
+print runstring
 #os.system(runstring)
 
 #takes science/5oct2-2.csv as input
@@ -295,15 +300,21 @@ runstring+=" -is_per_group_csv="+basedir+"is_groups.csv"
 print runstring
 #os.system(runstring)
 
-prog="/Users/security/science/software/ISsuite/"+"r_bars_normalized_location_groups.py"
+#prog="/Users/security/science/software/ISsuite/"+"r_bars_normalized_location_groups.py"
 #runstring="python "+prog
-runstring+=" -in_csv="+basedir+"is_groups.csv"
-runstring+=" -out="+basedir+"group_frequencies.pdf"
+#runstring+=" -in_csv="+basedir+"is_groups.csv"
+#print runstring
+#runstring+=" -out="+basedir+"group_frequencies.pdf"
 #os.system(runstring)
 
 
+prog="/Users/security/science/software/ISsuite/"+"makedb_from_resultscsv.py"
+runstring="python "+prog
+runstring+=" -fullist="+basedir+"fullist.csv"
+runstring+=" -outdb="+"/Users/security/science/dest2.db"
 
-
+os.system(runstring)
+#
 
 print "finished program"
 
