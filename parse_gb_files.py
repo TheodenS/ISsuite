@@ -104,7 +104,11 @@ def isinfo(issname):
         ltas=l.split("\t")
         myn=ltas[1]
         if ltas[1]==issname:
+            # for rpod search:
             return l
+    return "no is info"
+
+            #return l
     #raw_input(issname)
 
 
@@ -219,7 +223,7 @@ for genome in getdir(args.gbfilesdir):
                     # append to list containing genomes with is elements
                     if not propername in isgenomelist:
                         isgenomelist.append(propername)
-                    istype=str(feature.type)
+                    istype=str(feature.type).split("_")[0]
 
     
 

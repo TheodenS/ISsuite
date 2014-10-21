@@ -115,7 +115,7 @@ if not os.path.isfile(basedir+"query_histogram.pdf"):
 if not os.path.isfile(basedir+"subject_histogram.pdf"):
     cmd_make_sbjct_fasta="python /Users/security/science/software/ISsuite/makehistogram.py -in_csv="+basedir+"subject_summary.csv"+" -out="+basedir+"subject_histogram.pdf"
     print "making historgram of subject seqs"
-    os.system(cmd_make_sbjct_fasta)
+    #os.system(cmd_make_sbjct_fasta)
 
 
 resultname="rvg"
@@ -126,7 +126,7 @@ if not os.path.isfile(blast_output_location+resultname+".xml"):
     runstring+=" -queryfile " + args.queryfastafile
     runstring+=" -genomefasta " +genomefasta_dir+"renamed.fa" 
     print "running blast outputting "+blast_output_location+resultname+".xml"
-    os.system(runstring)
+    #os.system(runstring)
 
     report("ran blast_reps_vs_genomes_fasta.py\n",text_results_file)
 
@@ -158,7 +158,7 @@ if not os.path.isfile(place_contig_dic_location):
     runstring+=" -place_contig_csv="+place_contig_csv_location
     runstring+=" -metadata_csv="+metadata_csv
     print runstring
-    os.system(runstring)
+    #os.system(runstring)
 
 
 # outputs detainledcsv, with
@@ -180,7 +180,7 @@ runstring+=" -iscsvlong="+basedir+"iscsvlong.csv"
 runstring+=" -iscsvdetailed="+basedir+"iscsvdetailed.csv"
 
 print runstring
-#os.system(runstring)
+os.system(runstring)
 
 
 prog="/Users/security/science/software/ISsuite/"+"foundislengthhistogram.py"
@@ -207,7 +207,7 @@ if not os.path.isfile(iscounts_contigcsv):
     #runstring+=" -database="+"/Users/security/science/trydic2.csv"
     runstring+=" -outcsv="+iscounts_contigcsv
     print runstring
-    #os.system(runstring)
+    os.system(runstring)
 
 
 #prodcuces csv joined.csv,with environmental data added to stations
@@ -217,13 +217,13 @@ runstring+=" -iscounts_contigcsv="+iscounts_contigcsv
 runstring+=" -outcsv="+joinedcsv
 print runstring
 
-#os.system(runstring)
+os.system(runstring)
 
 prog="/Users/security/science/software/ISsuite/"+"modify_csv_joindepths.py"
 runstring="python "+prog
 runstring+=" -incsv="+joinedcsv
 runstring+=" -outcsv="+joinedcsv+"-joinedfilters.csv"
-#os.system(runstring)
+os.system(runstring)
 print runstring
 
 
@@ -234,14 +234,14 @@ runstring+=" -in_csv="+joinedcsv
 #runstring+=" -in_csv_all="+joinedcsv+"m.csv"
 runstring+=" -in_csv_all="+joinedcsv+"-joinedfilters.csv"
 runstring+=" -out="+basedir+"plt.pdf"
-#os.system(runstring)
+os.system(runstring)
 print runstring
 
 prog="/Users/security/science/software/ISsuite/"+"r_ggpairs.py"
 runstring="python "+prog
 runstring+=" -in_csv="+basedir+"joined.csv"
 runstring+=" -out="+basedir+"environmentalpairs.png"
-#os.system(runstring)
+os.system(runstring)
 print runstring
 
 
@@ -260,7 +260,7 @@ runstring+=" -iscsvlongf="+basedir+"iscsvlong.csv"
 runstring+=" -outcsv="+contigs_with_is_count_csv
 
 print runstring
-#os.system(runstring)
+os.system(runstring)
 
 prog="/Users/security/science/software/ISsuite/"+"moremoremorejoincsv.py"
 runstring="python "+prog
@@ -290,7 +290,7 @@ runstring+=" -is_contigs_count_csv="+basedir+"fullist.csv"
 #runstring+=" -is_contigs_count_csv="+contigs_with_is_count_csv
 runstring+=" -group_out_dir="+"bactgroups"
 print runstring
-#os.system(runstring)
+os.system(runstring)
 
 #takes science/5oct2-2.csv as input
 prog="/Users/security/science/software/ISsuite/"+"get_transcripts_orgn_place.py"
@@ -298,14 +298,14 @@ runstring="python "+prog
 runstring+=" -is_contigs_count_csv="+basedir+"fullist.csv"
 runstring+=" -is_per_group_csv="+basedir+"is_groups.csv"
 print runstring
-#os.system(runstring)
+os.system(runstring)
 
 #prog="/Users/security/science/software/ISsuite/"+"r_bars_normalized_location_groups.py"
 #runstring="python "+prog
 #runstring+=" -in_csv="+basedir+"is_groups.csv"
 #print runstring
 #runstring+=" -out="+basedir+"group_frequencies.pdf"
-#os.system(runstring)
+os.system(runstring)
 
 
 prog="/Users/security/science/software/ISsuite/"+"makedb_from_resultscsv.py"
