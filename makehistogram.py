@@ -21,6 +21,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("-in_csv", help="")
 parser.add_argument("-out", help="")
+parser.add_argument("-title", help="")
 
 args=parser.parse_args()
 
@@ -42,15 +43,19 @@ as_num = robjects.r['as.numeric']
 as_mat = robjects.r['as.matrix']
 
 test22=as_vec(dataf.rx('Length'))
+
+
+
 test23=as_num(test22[0])
 
 r_base = importr('base')
 newsum= r_base.summary(test23)
-#for k, v in newsum.items():
-#    #print("%s: %.3f\n" %(k, v))
-#    print k
-#    print v
-#print "end summary"
+print "data has "+str(len(test23))+" points"
+for k, v in newsum.items():
+    #print("%s: %.3f\n" %(k, v))
+    print k
+    print v
+print "end summary"
 
 
 #print "median"
@@ -74,7 +79,7 @@ gp = ggplot2.ggplot(dataf)
 
 	    # pp = gp + ggplot2.aes_string(x='%s(contrrr)') +  ggplot2.geom_histogram()+ggplot2.scale_y_sqrt()
 #bins=10
-teest3=robjects.r('theme(axis.text.x=element_text(angle=90))')
+theme=robjects.r('theme(axis.text.x=element_text(angle=90))')
 
 pp = gp + \
 ggplot2.aes_string(x='Length') +  \
@@ -82,6 +87,7 @@ ggplot2.geom_histogram()+\
 ggplot2.ggtitle("Found IS fragment lengths")+ \
 ggplot2.scale_x_continuous(name="fragment lengths, bin="+str(bins),breaks=scales.pretty_breaks(20)) +\
 ggplot2.scale_y_continuous(labels=scales.comma,name="Count",breaks=scales.pretty_breaks(10))+ \
-teest3
+ggplot2.ggtitle(args.title)+\
+theme
 pp.plot()
 robjects.r.ggsave(args.out)

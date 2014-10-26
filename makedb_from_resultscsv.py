@@ -148,7 +148,6 @@ hades=""
 for v in splithead:
     #v=sh.cell_value(rowx=0, colx=col)
     if v=="group":
-        print "renamed"
         v="group_"
     ty="TEXT"
     #ty=gettype(v)
@@ -285,7 +284,8 @@ for org in allsplit:
 
 
         
-        xlinsert=xls_insertrow.replace("-","_dash_")
+        #xlinsert=xls_insertrow.replace("-","_dash_")
+        xlinsert=xls_insertrow
         #insertstring+=xls_insertrow
         #insertstring+=xlinsert
         insertstring+=xlinsert[1:]

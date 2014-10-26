@@ -24,6 +24,9 @@ def countgc(myseq):
 parser = argparse.ArgumentParser()
 parser.add_argument("-fastafile", help="fastafile with seqs to be tested for ISISIS")
 parser.add_argument("-query_summary_csv", help="databasename")
+parser.add_argument("-renamedqueryfile", help="databasename")
+parser.add_argument("-minseqlen", help="databasename")
+parser.add_argument("-maxseqlen", help="databasename")
 
 
 args=parser.parse_args()
@@ -46,14 +49,39 @@ for org in fastagroup:
 	#print org
         genomescount+=1
         seq_len=len(org.seq)
-        weirds=countweirds(str(org.seq))
-        countGC=countgc(str(org.seq))
+        seqlen=seq_len
+        if seqlen>=int(args.minseqlen) and seqlen<=int(args.maxseqlen):
 
-        csvstring+=org.name+","+"query_"+str(genomescount)+","+str(seq_len)+","+str(org.seq)+","+str(countGC/float(seq_len))+","+str(weirds)+"\n"
+
+
+
+
+            weirds=countweirds(str(org.seq))
+            countGC=countgc(str(org.seq))
+
+            csvstring+=org.name+","+"query_"+str(genomescount)+","+str(seq_len)+","+str(org.seq)+","+str(countGC/float(seq_len))+","+str(weirds)+"\n"
 	
+        # Check the length of the seq
+        #############
+            myid=str(genomescount)
+            isname=myid
+            isseq=str(org.seq)
+            s=Seq(isseq,IUPAC.IUPACUnambiguousDNA())
+            newrec=SeqRecord(s)
+            newrec.id="query_"+str(myid)
+            newrec.description=""
+            fasta_recs_all.append(newrec)
+
+        else:
+            print "discarded length "+str(seqlen)
+
 
 summary_csvh=open(args.query_summary_csv,"w")
 summary_csvh.write(csvstring)
+
+fasta_fh=open(args.renamedqueryfile,"w")
+SeqIO.write(fasta_recs_all,fasta_fh,"fasta")
+fasta_fh.close()
 
 
 

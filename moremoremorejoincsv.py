@@ -35,13 +35,12 @@ def get_detailed_info(contigname):
         if detailedrow=="":
             continue
         splitrow=detailedrow.split(",")
-        propername=splitrow[2]
-
+        propername=splitrow[3]
         if propername==contigname:
             hcount+=1
             retrow=detailedrow
             return retrow
-    return ",,,,,,"
+    return "nod,nod,nod,nod,nod,nod,nod,nod,nod,nod,nod,nod,nod,nod,nod,nod"
 
 
 
@@ -65,7 +64,7 @@ for col in range(0,sh.ncols):
     val=str(sh.cell_value(rowx=0, colx=col)).replace(",","_comma_")
     #print val
     if val=="GS673_3p0":
-        print "HEREEEEEEEEEEEEEEEEEEEEEEE"
+        print "changed faulty station name"
         val="GS667_3p0"
     headline+=val+","
 
@@ -93,8 +92,6 @@ for row in range(1,sh.nrows):
 
 
 
-
-placelist=["GS675_3p0", "GS675_0p8", "GS675_0p1", "GS676_3p0", "GS676_0p8","GS676_0p1","GS677_3p0", "GS677_0p8","GS677_0p1","GS678_3p0","GS667_3p0", "GS678_0p8","GS678_0p1","GS679_0p1","GS679_0p8","GS679_3p0","GS667_0p8","GS680_3p0","GS680_0p8","GS680_0p1","GS683_3p0","GS683_0p8","GS683_0p1","GS684_3p0","GS684_0p8","GS684_0p1","GS667_0p1","GS694_3p0","GS694_0p8","GS694_0p1","GS695_3p0","GS695_0p8","GS695_0p1","GS669_3p0","GS669_0p8","GS669_0p1","GS670_3p0","GS670_0p8","GS670_0p1","GS845_ls3","GS846_ls3","GS848_ls3","GS850_ls4","GS852_ls4","GS853_ls4","GS855_ls4","GS856_ls5","GS857_ls5","GS859_ls5","GS860_ls5","LD30M_ls2","LD3200M_ls1","LD35M_ls2","LD390M_ls1"]
 
 
 outfh=open("/Users/security/science/5oct2new.csv","w")

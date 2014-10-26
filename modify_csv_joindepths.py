@@ -41,17 +41,17 @@ for station in stationlist:
         if mystation==station:
             statrow=row
             countd+=1
-            print mystation
+            #print mystation
             iscount=tbs[5].split("0.")[0]
             totalis+=int(iscount)
             allcount=tbs[4].split("0.")[0]
             totalc+=int(allcount)
         
-    print totalc
-    print totalis
-    print countd
+    #print totalc
+    #print totalis
+    #print countd
     outrow=outrow+statrow+str(totalc)+","+str(totalis)+","+str(countd)+row+"\n"
-    print outrow
+    #print outrow
 
 
 
@@ -59,7 +59,7 @@ for station in stationlist:
 infh=open(args.outcsv,"w")
 #infh=open("/Users/security/science/correctstations6/joined_all.csv","w")
 infh.write(outrow)
-print stationlist
+#print stationlist
 
 
 

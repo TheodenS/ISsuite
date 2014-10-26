@@ -26,13 +26,15 @@ def getISlength(isname):
         if isn=="":
             continue
         parts=isn.split(",")
-        name=parts[0]
+        name=parts[1]
+        # parts[0[ for is search?
+        name=parts[1]
         if name==isname:
             return parts[2]
 
     
     raw_input("no is found")
-    print "for"+str(isname)
+    #print "for"+str(isname)
 
 def makelengthheadline(frac):
     totline=""
@@ -121,7 +123,7 @@ def makefracstring(contl,fraclist):
     return retstring
 
 def foundatlocation(myloc,contname):
-    print contname
+    #print contname
     num="NONE"
     if contname in placecontigdic[myloc].keys():
         num=placecontigdic[myloc][contname]
@@ -168,8 +170,15 @@ total_length=0
 con2 = sqlite3.connect(args.genomedatabase)
 cur2 = con2.cursor()  
 
-csvstring="name,myid,isname,start,end,hitlen,evalue,seq"+makelengthheadline(fraclist)+"\n"
+csvstring="name,myid,isname,start,end,hitlen,evalue,seq,queryfraction,subjfraction\n"
 
+
+detailedcsv="isname,abbcontig,propercontig,loc_start,loc_end,loc_strand,score,expected,sbjct_start,sbject_end,sbjctseq,queryseq\n"
+
+header="hit_abb,sbjct_abb,hit_name,sbjct_name,length_on_subj,strand,score,expected,query_start,query_end,sbjct_start,sbject_end,query_seq,sbjc_seq,queryfraction,subjfraction\n"
+
+
+csvstring=header
 
 # For looking up lenghths of ISs
 tempIS_csv_handle=open(args.iscsv,"r")
@@ -195,6 +204,7 @@ for genome in getdir(args.gbfilesdir):
         genome_lendic=make_len_dic()
 
 	propername=getsa(genome.replace(".gb",""))
+
 	id_gb_location=args.gbfilesdir
         idfilepath=id_gb_location+genome
         id_file_handle=open(idfilepath,"r")
@@ -203,8 +213,16 @@ for genome in getdir(args.gbfilesdir):
         if len(gbparse)!=1:
             raw_input("mulitple gbrecords")
 	gbrecord=gbparse[0]
+        reclen=len(gbrecord.seq)
+
+
+        featurecount=0
+
+
+        realfeatures=[]
 
 	for feature in gbrecord.features:
+                
 		if feature.type =="nohit":
 			continue	
 		if feature.type =="repeathit":
@@ -213,9 +231,49 @@ for genome in getdir(args.gbfilesdir):
 			continue	
 		if feature.type =="not found":
 			continue	
+                realfeatures.append(feature)
+
+        sortedfeature=sorted(realfeatures, key=lambda x: float(x.qualifiers["score"][0]),reverse=True)
+
+            #print "sorted"
+            #for sor in sortedfeature:
+            #    print sor.qualifiers["score"][0]
+            #print "unsorted"
+            #for usor in realfeatures:
+            #    print usor.qualifiers["score"][0]
+
+
+	#for feature in gbrecord.features:
+	if True:
+                feature=sortedfeature[0]
+
                 
+		if feature.type =="nohit":
+			continue	
+		if feature.type =="repeathit":
+			continue	
+		if feature.type =="footprint":
+			continue	
+		if feature.type =="not found":
+			continue	
+
+                featurecount+=1
+
+                if featurecount>1:
+                    print "more features in "+genome
+
                 # get evalue from feature
                 evalue=float(feature.qualifiers["expected"][0])
+                score=float(feature.qualifiers["score"][0])
+
+                query_start=str(feature.qualifiers["query_start"][0]).strip().replace(" ","")
+                query_end=str(feature.qualifiers["query_end"][0]).strip().replace(" ","")
+
+                sbjct_start=str(feature.qualifiers["sbjct_start"][0]).strip().replace(" ","")
+                sbjct_end=str(feature.qualifiers["sbjct_end"][0]).strip().replace(" ","")
+
+                sbjct_seq=str(feature.qualifiers["sbjct"][0]).strip().replace(" ","")
+                query_seq=str(feature.qualifiers["query"][0]).strip().replace(" ","")
 
 
                 if evalue<float(args.maxeval):
@@ -250,108 +308,123 @@ for genome in getdir(args.gbfilesdir):
 
 		total_length+=hitlen
 
-                islent=getISlength(istype)
+                islent=getISlength(feature.type)
 
 		fracoforig=str(round(len(hitseq)/float(islent),3))
+		fracofsubj=str(round(len(hitseq)/float(reclen),3))
 
 		genome_lendic=plusfrac(genome_lendic,len(hitseq),islent,fraclist)
                 me2= makefracstring(genome_lendic,fraclist)
 
-		csvstring+=propername+","+str(genome.replace(".gb",""))+","+feature.type+","+str(hit_start)+","+str(hit_end)+","+str(len(hitseq))+","+str(evalue)+","+str(hitseq)+me2+"\n"
+		#csvstring+=propername+","+str(genome.replace(".gb",""))+","+feature.type+","+str(hit_start)+","+str(hit_end)+","+str(len(hitseq))+","+str(evalue)+","+str(hitseq)+me2+"\n"
+
+
+                csvstring+=str(feature.type)+","
+                csvstring+=genome.replace(".gb","").replace(",","")+","
+                csvstring+="no_prp_quername"+","
+                csvstring+=propername.replace(",","")+","
+                csvstring+=str(hitlen)+","
+                csvstring+=str(strand)+","
+                csvstring+=str(score)+","
+                csvstring+=str(evalue)+","
+                csvstring+=str(query_start)+","
+                csvstring+=str(query_end)+","
+                csvstring+=str(sbjct_start)+","
+                csvstring+=str(sbjct_end)+","
+                csvstring+=str(sbjct_seq)+","
+                csvstring+=str(query_seq)+","
+                csvstring+=str(fracoforig)+","
+                csvstring+=str(fracofsubj)+"\n"
+
+
+		#csvstring+=propername+","+str(genome.replace(".gb",""))+","+str(feature.type).replace(",","_comma_")+","+str(hit_start)+","+str(hit_end)+","+str(len(hitseq))+","+str(evalue)+","+str(hitseq)+","+str(fracoforig)+","+fracofsubj+"\n"
 
 fh=open(args.contigs_with_is_csv,"w")
 fh.write(csvstring)
 fh.close()
 
 #pifh=open("/Users/security/science/iscontiglibrary.dic","w")
-pifh=open(args.iscontiglist,"w")
-pickle.dump(isgenomelist,pifh)
-
-
-print isdic
-print len(isgenomelist)
-pifh2=open(args.isdicout,"w")
-pickle.dump(isdic,pifh2)
-
-pifh2=open(args.isdicout+"isdicc","w")
-pickle.dump(dickofice,pifh2)
-
-
-pifh2.close()
-
-
-
-placecontigdigfh=open(args.place_contig_dic,"r")
-#placecontigdigfh=open("/Users/security/science/transcless3ke5/place_contig_dic.pydic","r")
-placecontigdic=pickle.load(placecontigdigfh)
-
-
-
-pifh4=open("/Users/security/science/"+"ISseqs_info.csv","r")
-pifread=pifh4.read()
-prlines=pifread.split("\n")
-prlines=prlines[1:]
-
-
-#pifh3=open("/Users/security/science/transcless3ke5/isdicout.piclisdicc","r")
-pifh3=open(args.isdicout+"isdicc","r")
-placedi=pickle.load(pifh3)
-
-
-ougcsv="isname,count\n"
-detailedcsv="isname,abbcontig,propercontig,loc_start,loc_end,loc_strand,score,expected,sbjct_start,sbject_end,sbjctseq,queryseq\n"
-
-for k1 in placedi.keys():
-
-    print "k"
-    print k1
-    addst=isinfo(k1)
-    num=0
-    myloc=33
-    for i in placedi[k1]:
-        print i[0]
-        fe=i[0]
-        con=i[1]
-        detailedcsv+=k1+","
-        detailedcsv+=con.name+","
-        detailedcsv+=i[2]+","
-        #detailedcsv+=str(foundatlocation(myloc,i[2]))+","
-        detailedcsv+=str(fe.location.start)+","
-        detailedcsv+=str(fe.location.end)+","
-        detailedcsv+=str(fe.location.strand)+","
-        detailedcsv+=str(fe.qualifiers["score"][0])+","
-        detailedcsv+=str(fe.qualifiers["expected"][0])+","
-        detailedcsv+=str(fe.qualifiers["sbjct_start"][0])+","
-        detailedcsv+=str(fe.qualifiers["sbjct_end"][0])+","
-        detailedcsv+=str(fe.qualifiers["sbjct"][0])+","
-        detailedcsv+=str(fe.qualifiers["query"][0])+","
-        detailedcsv+="\n"
-        num+=1
-        #print i
-    print num
-    ougcsv+=k1+","+str(num)+addst.replace("\t",",")+"\n"
-
-tfh=open(args.iscsvlong,"w")
-#tfh=open("/Users/security/science/iscsvlong.csv","w")
-tfh.write(ougcsv)
-
-tfh2=open(args.iscsvdetailed,"w")
-#tfh2=open("/Users/security/science/iscsvdetailed.csv","w")
-tfh2.write(detailedcsv)
-
-
-
-"""    Key: align_length, Value: ['665']
-    Key: bits, Value: ['206.87']
-    Key: expect, Value: ['2.02053e-53']
-    Key: expected, Value: ['2.02053e-53']
-    Key: frame, Value: ['1', '1']
-    Key: hit_def, Value: ['ISPen2']
-    Key: query, Value: ['GATCAAGCAGTGCTGGCTTGAGAGTGGTGCAGTCTATGGCTATCGCAAGAT TCATGATAATTTACGCCATCTCGGTATTGCCTGTGGGCAGCAACGGGTCAGGCGACTCA TGAAGGCCCAAGGACTGCGCTCACAGACTGGGTATCGCAGGAGGCCTAA-TAGCAAACC GGGTGAGGCTGCAGCCGCAGCGCCCAATGTCTTGGATCGTAAGTTTGAGGTCGCCACAC CCAATGACTCTTGGGTGGTGGATATTACGTACATCAAAACACATGAAGGTTGGCTCTAT TTGGCAGCAGTCCTTGATCTATTTTCTCGGGCTGTCATTGGCTGGTCGATGCAAAGCC- -GTATTGATCGG-GAGTTGGTGATCTCAGCGCTACTGATGGCCATCTGGCGCCGCCAGC CAAAGGGTAAGGTGTTGCTTCACTCGGATCAGGGTTGTCAGTTCACAAGCAGTGATTGG CAAGACTTCTTAGAGGTGAACAACTTCACGATCAGCATGAGTCGACGTGGGAACTGTTA TGACAACGCAGTTGTTGAAAGTTTCTTCCAACTTCTAAAGCGTGAGCGCATCAAACGCA GAATCTATGCGAGTCGAGAAGAGGCTCGAGCCGATGTGTTCGATTACATCGAGATGTTT TATAACCCTGTCCGGCGCCACGGC']
-    Key: query_end, Value: ['760']
-    Key: query_start, Value: ['100']
-    Key: sbjct, Value: ['GATCAAGCAGGCCTGGTTAGAAAGCGGCGGCGTGTATGGCTATCGCAAGAT TCACGATGACCTGCGAGAGCTAGGAGAGATCTGTGGGCGAAATCGAGTCGGTCGCTTGA TGCAGGCAGAGGGGCTGCGTTCGCAAACGGGCCATCGCCGTCGTACTGGGTTTTATAGC GGAAAAC-CAACAGCGGCATCGCCCAACCATCTGGCCCGGCAGTTCAAGGTCAGTGAGC CGAATAAGGTCTGGGTGACCGATATCACCTACATCCGCACCTATGAAGGGTGGCTGTAC CTGGCGGTAGTGCTGGATCTGTTCTCTCGCCAAGTCATTGGTTGGTCAATG--AAGCCC AGGAT-GAGCAGCGACCTAGCCATCGACGCCATGCTGATGGCCTTGTGGCGACGCAAGC CACAGCAGCAAGTGATGATTCACTCAGACCAAGGCAGTCAGTTCAGTAGCTCAGATTGG CAAAGCTTCCTGAAGGCCAACAATGTGATCAGTAGCATGAGCCGACGGGGAAACTGCCA CGACAATGCCGTAGCCGAGAGCTTTTTCCAGCTTTTGAAGCGGGAGCGAATCCGACGAA AGATCTACGCAACGCGTGACGAAGCCCGAAGTGATATTTTCGATTACATCGAGATGTTC TATAACCCTAAACGCCGACACGGC']
-    Key: sbjct_end, Value: ['1148']
-    Key: sbjct_start, Value: ['488']
-    Key: score, Value: ['228.0']
-    """
+#pifh=open(args.iscontiglist,"w")
+#pickle.dump(isgenomelist,pifh)
+#
+#
+#pifh2=open(args.isdicout,"w")
+#pickle.dump(isdic,pifh2)
+#
+#pifh2=open(args.isdicout+"isdicc","w")
+#pickle.dump(dickofice,pifh2)
+#
+#
+#pifh2.close()
+#
+#
+#
+#placecontigdigfh=open(args.place_contig_dic,"r")
+##placecontigdigfh=open("/Users/security/science/transcless3ke5/place_contig_dic.pydic","r")
+#placecontigdic=pickle.load(placecontigdigfh)
+#
+#
+#
+#pifh4=open("/Users/security/science/"+"ISseqs_info.csv","r")
+#pifread=pifh4.read()
+#prlines=pifread.split("\n")
+#prlines=prlines[1:]
+#
+#
+##pifh3=open("/Users/security/science/transcless3ke5/isdicout.piclisdicc","r")
+#pifh3=open(args.isdicout+"isdicc","r")
+#placedi=pickle.load(pifh3)
+#
+#
+#ougcsv="isname,count\n"
+#detailedcsv="isname,abbcontig,propercontig,loc_start,loc_end,loc_strand,score,expected,sbjct_start,sbject_end,sbjctseq,queryseq\n"
+#
+#for k1 in placedi.keys():
+#
+#    addst=isinfo(k1)
+#    num=0
+#    myloc=33
+#    for i in placedi[k1]:
+#        fe=i[0]
+#        con=i[1]
+#        detailedcsv+=k1+","
+#        detailedcsv+=con.name+","
+#        detailedcsv+=i[2]+","
+#        #detailedcsv+=str(foundatlocation(myloc,i[2]))+","
+#        detailedcsv+=str(fe.location.start)+","
+#        detailedcsv+=str(fe.location.end)+","
+#        detailedcsv+=str(fe.location.strand)+","
+#        detailedcsv+=str(fe.qualifiers["score"][0])+","
+#        detailedcsv+=str(fe.qualifiers["expected"][0])+","
+#        detailedcsv+=str(fe.qualifiers["sbjct_start"][0])+","
+#        detailedcsv+=str(fe.qualifiers["sbjct_end"][0])+","
+#        detailedcsv+=str(fe.qualifiers["sbjct"][0])+","
+#        detailedcsv+=str(fe.qualifiers["query"][0])+","
+#        detailedcsv+="\n"
+#        num+=1
+#    ougcsv+=k1+","+str(num)+addst.replace("\t",",")+"\n"
+#
+#tfh=open(args.iscsvlong,"w")
+##tfh=open("/Users/security/science/iscsvlong.csv","w")
+#tfh.write(ougcsv)
+#
+#tfh2=open(args.iscsvdetailed,"w")
+##tfh2=open("/Users/security/science/iscsvdetailed.csv","w")
+#tfh2.write(detailedcsv)
+#
+#
+#
+#"""    Key: align_length, Value: ['665']
+#    Key: bits, Value: ['206.87']
+#    Key: expect, Value: ['2.02053e-53']
+#    Key: expected, Value: ['2.02053e-53']
+#    Key: frame, Value: ['1', '1']
+#    Key: hit_def, Value: ['ISPen2']
+#    Key: query, Value: ['GATCAAGCAGTGCTGGCTTGAGAGTGGTGCAGTCTATGGCTATCGCAAGAT TCATGATAATTTACGCCATCTCGGTATTGCCTGTGGGCAGCAACGGGTCAGGCGACTCA TGAAGGCCCAAGGACTGCGCTCACAGACTGGGTATCGCAGGAGGCCTAA-TAGCAAACC GGGTGAGGCTGCAGCCGCAGCGCCCAATGTCTTGGATCGTAAGTTTGAGGTCGCCACAC CCAATGACTCTTGGGTGGTGGATATTACGTACATCAAAACACATGAAGGTTGGCTCTAT TTGGCAGCAGTCCTTGATCTATTTTCTCGGGCTGTCATTGGCTGGTCGATGCAAAGCC- -GTATTGATCGG-GAGTTGGTGATCTCAGCGCTACTGATGGCCATCTGGCGCCGCCAGC CAAAGGGTAAGGTGTTGCTTCACTCGGATCAGGGTTGTCAGTTCACAAGCAGTGATTGG CAAGACTTCTTAGAGGTGAACAACTTCACGATCAGCATGAGTCGACGTGGGAACTGTTA TGACAACGCAGTTGTTGAAAGTTTCTTCCAACTTCTAAAGCGTGAGCGCATCAAACGCA GAATCTATGCGAGTCGAGAAGAGGCTCGAGCCGATGTGTTCGATTACATCGAGATGTTT TATAACCCTGTCCGGCGCCACGGC']
+#    Key: query_end, Value: ['760']
+#    Key: query_start, Value: ['100']
+#    Key: sbjct, Value: ['GATCAAGCAGGCCTGGTTAGAAAGCGGCGGCGTGTATGGCTATCGCAAGAT TCACGATGACCTGCGAGAGCTAGGAGAGATCTGTGGGCGAAATCGAGTCGGTCGCTTGA TGCAGGCAGAGGGGCTGCGTTCGCAAACGGGCCATCGCCGTCGTACTGGGTTTTATAGC GGAAAAC-CAACAGCGGCATCGCCCAACCATCTGGCCCGGCAGTTCAAGGTCAGTGAGC CGAATAAGGTCTGGGTGACCGATATCACCTACATCCGCACCTATGAAGGGTGGCTGTAC CTGGCGGTAGTGCTGGATCTGTTCTCTCGCCAAGTCATTGGTTGGTCAATG--AAGCCC AGGAT-GAGCAGCGACCTAGCCATCGACGCCATGCTGATGGCCTTGTGGCGACGCAAGC CACAGCAGCAAGTGATGATTCACTCAGACCAAGGCAGTCAGTTCAGTAGCTCAGATTGG CAAAGCTTCCTGAAGGCCAACAATGTGATCAGTAGCATGAGCCGACGGGGAAACTGCCA CGACAATGCCGTAGCCGAGAGCTTTTTCCAGCTTTTGAAGCGGGAGCGAATCCGACGAA AGATCTACGCAACGCGTGACGAAGCCCGAAGTGATATTTTCGATTACATCGAGATGTTC TATAACCCTAAACGCCGACACGGC']
+#    Key: sbjct_end, Value: ['1148']
+#    Key: sbjct_start, Value: ['488']
+#    Key: score, Value: ['228.0']
+#    """

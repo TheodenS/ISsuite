@@ -4,6 +4,8 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-place_contig_dic", help="outcsv")
 parser.add_argument("-outcsv", help="outcsv")
+parser.add_argument("-hitlist", help="outcsv")
+
 
 
 args=parser.parse_args()
@@ -24,20 +26,16 @@ di=pickle.load(wh)
 #print di.keys()
 
 
-pifh=open("/Users/security/science/iscontiglibrary.dic","r")
+pifh=open(args.hitlist,"r")
+#pifh=open("/Users/security/science/iscontiglibrary.dic","r")
 islist=pickle.load(pifh)
-
-#"GS675_3p0"
 
 csvout=""
 
-print len(di.keys())
-print len(range(33,87))
 for numkey in range(33,87):
 
     # place with list of transcripts, and their number of hits 
     placedic=di[numkey]
-    #print placedic
 
     nameidx=numkey-33
     placename=placelist[nameidx]
@@ -66,5 +64,4 @@ for numkey in range(33,87):
 
 
 mid=open(args.outcsv,"w")
-#mid=open("/Users/security/science/ccc2.csv","w")
 mid.write(csvout)

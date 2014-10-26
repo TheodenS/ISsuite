@@ -37,13 +37,14 @@ robjects.r('png("'+args.out+'",width=2000,heigh=2000)')
 #dataf=robjects.r('mydata <- read.delim("/Users/security/science/correctstations4/joined4.csv", sep="," , header=TRUE)')
 dataf=robjects.r('mydata <- read.delim("'+args.in_csv+'", sep="," , header=TRUE)')
 smalls=robjects.r('onlyfilts<-subset(mydata,filtersize %in% c("0p1","0p8","3p0"))')
-yet=robjects.r('keeps <- c("ratio","alltranscripts","Chla","Lat","Lon","Sal","Temp","pH","O","N","NO3","NH4")')
+yet=robjects.r('keeps <- c("istranscripts","ratio","alltranscripts","Chla","Lat","Lon","Sal","Temp","pH","O","N","NO3","NH4")')
+#yet=robjects.r('keeps <- c("ratio","alltranscripts","Chla","Lat","Lon","Sal","Temp","pH","O","N","NO3","NH4")')
 #yet=robjects.r('keeps <- c("istranscripts","alltranscripts","Chla","Lat","Lon","Sal","Temp","N")')
 isnum=robjects.r('attach(mydata)')
 #isnum3=robjects.r('iss<-istranscripts')
 #isnum3=robjects.r('alltrans<-alltranscripts')
 hh=robjects.r('ne<-onlyfilts[keeps]')
-print hh
+#print hh
 
 #isnum3=robjects.r('ratio<-iss/alltranscripts')
 #im4=robjects.r('oio<-ggpairs(ne,upper = list(params = c(size = 10)),panel = panel.smooth)')

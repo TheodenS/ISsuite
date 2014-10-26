@@ -27,6 +27,9 @@ parser.add_argument("-databasefile", help="databasefile")
 parser.add_argument("-databasename", help="databasename")
 parser.add_argument("-renamedfastafile", help="databasename")
 parser.add_argument("-sbjct_summary_csv", help="databasename")
+parser.add_argument("-minseqlen", help="databasename")
+parser.add_argument("-maxseqlen", help="databasename")
+parser.add_argument("-abb_prefix", help="databasename")
 
 
 args=parser.parse_args()
@@ -86,14 +89,22 @@ for org in fastagroup:
 
         csvstring+=org.name+","+"sbjct_"+str(genomescount)+","+str(seq_len)+","+str(org.seq)+","+str(countGC/float(seq_len))+","+str(weirds)+"\n"
 	
-	myid=str(genomescount)
-	isname=myid
-	isseq=str(org.seq)
-       	s=Seq(isseq,IUPAC.IUPACUnambiguousDNA())
-        newrec=SeqRecord(s)
-        newrec.id="sbjct_"+str(myid)
-        newrec.description=""
-        fasta_recs_all.append(newrec)
+
+        # Check the length of the seq
+        #############
+        seqlen=len(org.seq)
+        if seqlen>=int(args.minseqlen) and seqlen<=int(args.maxseqlen):
+            myid=str(genomescount)
+            isname=myid
+            isseq=str(org.seq)
+            s=Seq(isseq,IUPAC.IUPACUnambiguousDNA())
+            newrec=SeqRecord(s)
+            newrec.id=args.abb_prefix+str(myid)
+            #newrec.id="sbjct_"+str(myid)
+            newrec.description=""
+            fasta_recs_all.append(newrec)
+        else:
+            print "discarded length "+str(seqlen)
 
         with con:
         	cur.execute(insertstring)
