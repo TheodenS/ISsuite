@@ -120,7 +120,7 @@ if not os.path.isfile(genomedatabase):
 
         cmstr+=" -minseqlen " + "30"
         cmstr+=" -maxseqlen " + "1000000"
-        cmstr+=" -abb_prefix" + "subj_"
+        cmstr+=" -abb_prefix " + "sbjct_"
 
         print "making contig info database and renamed fasta file (propername->myid) "+genomedatabase
         os.system(cmstr)
@@ -132,8 +132,8 @@ if not os.path.isfile(basedir+"query_summary.csv"):
     cmstr_querycsv="python /Users/security/science/software/ISsuite/make_query_csv.py -fastafile="+queryfastafile+" -query_summary_csv="+basedir+"query_summary.csv"
 
     cmstr_querycsv+=" -renamedqueryfile " + basedir+"renamed_query.fa"
-    cmstr_querycsv+=" -minseqlen " + "1000"
-    cmstr_querycsv+=" -maxseqlen " + "2000"
+    cmstr_querycsv+=" -minseqlen " + "500"
+    cmstr_querycsv+=" -maxseqlen " + "2500"
 
 
     os.system(cmstr_querycsv)
@@ -155,6 +155,7 @@ if not os.path.isfile(basedir+"subject_histogram.eps"):
     print "making historgram of subject seqs"
     os.system(cmd_make_sbject_histo)
 
+
 # Set destination name for blast results
 ###########
 resultname="rvg"
@@ -165,11 +166,11 @@ contigxmlresultspath=blast_output_location+resultname+".xml"
 prog="/Users/security/science/software/ISsuite/"+"blast_query_vs_sbject.py"
 if not os.path.isfile(blast_output_location+resultname+".xml"):
     runstring="python "+prog+" -genomeblastdb "+genomedbfilebase+" -blastlocation "+blastlocation+" -blastoutput "+contigxmlresultspath+" -evalue "+str(float(args.maxeval)*10)
-    #runstring+=" -queryfile " + args.queryfastafile
-    runstring+=" -queryfile " + basedir+"renamed_query.fa"
+    runstring+=" -queryfile " + args.queryfastafile
+    #runstring+=" -queryfile " + basedir+"renamed_query.fa"
     runstring+=" -genomefasta " +genomefasta_dir+"renamed.fa" 
     print "running blast outputting "+blast_output_location+resultname+".xml"
-  #  os.system(runstring)
+    os.system(runstring)
     report("ran blast_reps_vs_genomes_fasta.py\n",text_results_file)
 
 
@@ -181,7 +182,7 @@ runstring="python "+prog+" -blastoutput "+contigxmlresultspath
 runstring+=" -gbfilesdir "+gbfilesdir
 runstring+=" -evalue "+str(args.maxeval)
 runstring+=" -genomedb "+genomedatabase
-#os.system(runstring)
+os.system(runstring)
 
 # Identify the footprints by blasting against the queries
 #################
@@ -191,7 +192,7 @@ runstring="python "+prog+" -gbfiles "+gbfilesdir +" -tempfile "+helperfiles_dir+
 runstring+=" -repsfa "+args.basedir+"renamed_query.fa"
 runstring+=" -repeatsdb "+genomedbfilebase+"repsblastbase"
 print runstring
-#os.system(runstring)
+os.system(runstring)
 
 # Make a dictionary and csv connecting the stations to the subject seqs 
 # mydic[place][sbjct]=count
@@ -205,7 +206,7 @@ if not os.path.isfile(place_contig_dic_location):
     runstring+=" -place_contig_csv="+place_contig_csv_location
     runstring+=" -metadata_csv="+metadata_csv
     print runstring
-    os.system(runstring)
+    #os.system(runstring)
 
 
 # outputs detainledcsv, with
@@ -228,7 +229,7 @@ runstring+=" -iscsvlong="+basedir+"iscsvlong.csv"
 runstring+=" -iscsvdetailed="+basedir+"iscsvdetailed.csv"
 
 print runstring
-#os.system(runstring)
+os.system(runstring)
 
 # Make histogram of found pieces
 ####################
@@ -236,21 +237,21 @@ prog="/Users/security/science/software/ISsuite/"+"foundislengthhistogram.py"
 runstring="python "+prog 
 runstring+=" -in_csv "+contigs_with_is_csv
 runstring+=" -out "+foundishistogram
-#os.system(runstring)
+os.system(runstring)
 
 
 # outputs list with numkey,placename,station,depth,total transcripts, hittranscripts,fraction
 #as iscounts_contigcsv.csv
 ####################### 
-if not os.path.isfile(iscounts_contigcsv):
-    #prog="/Users/security/science/software/ISsuite/"+"count_no_transcripts.py"
-    prog="/Users/security/science/software/ISsuite/"+"masturbate.py"
-    runstring="python "+prog
-    runstring+=" -place_contig_dic="+place_contig_dic_location
-    runstring+=" -hitlist="+iscontiglist
-    runstring+=" -outcsv="+iscounts_contigcsv
-    print runstring
-    #os.system(runstring)
+#if not os.path.isfile(iscounts_contigcsv):
+#    #prog="/Users/security/science/software/ISsuite/"+"count_no_transcripts.py"
+#    prog="/Users/security/science/software/ISsuite/"+"masturbate.py"
+#    runstring="python "+prog
+#    runstring+=" -place_contig_dic="+place_contig_dic_location
+#    runstring+=" -hitlist="+iscontiglist
+#    runstring+=" -outcsv="+iscounts_contigcsv
+#    #print runstring
+#    #os.system(runstring)
 
 
 #produces csv joined.csv,with environmental data added to stations
@@ -259,7 +260,7 @@ prog="/Users/security/science/software/ISsuite/"+"join_csvs.py"
 runstring="python "+prog
 runstring+=" -iscounts_contigcsv="+iscounts_contigcsv
 runstring+=" -outcsv="+joinedcsv
-print runstring
+#print runstring
 #os.system(runstring)
 
 # produces a list of stations, where filter sizes have been joined together
@@ -269,7 +270,7 @@ runstring="python "+prog
 runstring+=" -incsv="+joinedcsv
 runstring+=" -outcsv="+joinedcsv+"-joinedfilters.csv"
 #os.system(runstring)
-print runstring
+#print runstring
 
 # Make graph with environment variables and hit counts
 # using joined.csv as in_csv
@@ -282,18 +283,14 @@ runstring+=" -plotfraction="+"False"
 runstring+=" -in_csv_joined="+joinedcsv+"-joinedfilters.csv"
 runstring+=" -out="+basedir+"plt.pdf"
 #os.system(runstring)
-print runstring
+#print runstring
 
 prog="/Users/security/science/software/ISsuite/"+"r_ggpairs.py"
 runstring="python "+prog
 runstring+=" -in_csv="+joinedcsv
 runstring+=" -out="+basedir+"environmentalpairs.png"
 #os.system(runstring)
-print runstring
-
-
-
-
+#print runstring
 
 contigs_with_is_count_csv=basedir+"contigs_with_is_count.csv"
 
@@ -318,7 +315,9 @@ runstring+=" -contigxls_isinfo_join_csv="+basedir+"fullist.csv"
 
 #print runstring
 
-#os.system(runstring)
+os.system(runstring)
+
+
 # joins list of iscontigs with is hits to extra info about is
 # used to output 5oct2-2.csv" 
 prog="/Users/security/science/software/ISsuite/"+"join_is_info_to_results.py"
@@ -374,6 +373,7 @@ if True:
     runstring+=" -out="+basedir+"bajs"
     runstring+=" -outcsv="+basedir+"summary.csv"
     runstring+=" -environmentaldata="+environmentaldata
+    runstring+=" -basepicout="+basedir
 
     os.system(runstring)
 # wrangle_results.py uses this

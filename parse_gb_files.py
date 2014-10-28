@@ -244,10 +244,8 @@ for genome in getdir(args.gbfilesdir):
 
 
 	#for feature in gbrecord.features:
-	if True:
+	if len(sortedfeature)>0:
                 feature=sortedfeature[0]
-
-                
 		if feature.type =="nohit":
 			continue	
 		if feature.type =="repeathit":

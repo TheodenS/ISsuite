@@ -16,13 +16,112 @@ from rpy2.robjects.vectors import DataFrame
 import math
 import datetime
 import csv
-#
-def gogmap_google(incsv,outname):
+import random
 
+
+def get_map_settings(title,yname):
+#graphtitle="TESTTI"
+
+    plottitlesize=str(8)
+    axistextsize=str(8)
+    axistitlesize=str(8)
+    xname="Longditude"
+
+    #robjects.r('m<-m +scale_y_continuous(breaks = (-2:2) * 30)')
+    #robjects.r('m<-m +scale_x_continuous(breaks = (-4:4) * 45)')
+    map_settings='ggtitle("'+title+'")' 
+    map_settings+='+theme('
+    map_settings+='plot.title = element_text(size='+plottitlesize+',lineheight=.8)'
+    map_settings+=',axis.text.x=element_text(size='+axistextsize+',angle=0)'
+    map_settings+=',axis.text.y=element_text(size='+axistextsize+',angle=0)'
+    map_settings+=',axis.title.x=element_text(size='+axistitlesize+')'
+    map_settings+=',axis.title.y=element_text(size='+axistitlesize+')'
+    map_settings+=',legend.position="none"'
+    map_settings+=')'
+    map_settings+='+scale_x_continuous(name="'+xname+'")'     
+    map_settings+='+scale_y_continuous(name="'+yname+'")'     
+
+#teest=robjects.r('p<-p+coord_fixed(ratio=400)')
+    return map_settings
+
+def get_bar_settings(title,yname):
+#graphtitle="TESTTI"
+
+    mycolorfirst = "%06x" % random.randint(0,0xFFFFFF)
+    mycolor="#"+str(mycolorfirst).upper()
+    print mycolor
+    plottitlesize=str(8)
+    axistextsize=str(8)
+    axistitlesize=str(8)
+    xname="station"
+
+    robjects.r('library(scales)')
+    bar_settings='geom_bar(stat="identity",position=position_dodge(),fill="'+mycolor+'")'    
+
+    bar_settings+='+ggtitle("'+title+'")' 
+    bar_settings+='+theme('
+    bar_settings+='plot.title = element_text(size='+plottitlesize+',lineheight=0.8)'
+    bar_settings+=',axis.text.x=element_text(size='+axistextsize+',angle=0)'
+    bar_settings+=',axis.text.y=element_text(size='+axistextsize+',angle=0)'
+    bar_settings+=',axis.title.x=element_blank()'
+    bar_settings+=',axis.title.y=element_text(size='+axistitlesize+')'
+    bar_settings+=',legend.position="none"'
+    bar_settings+=')'
+    bar_settings+='+scale_x_discrete(name="'+xname+'")'     
+    bar_settings+='+scale_y_continuous(labels=comma, name="'+yname+'")'     
+
+#teest=robjects.r('p<-p+coord_fixed(ratio=400)')
+    return bar_settings
+
+
+# Trying with maps
+##############
+
+#robjects.r('library(maps)')
+#robjects.r('map("world", interior = FALSE)')
+#robjects.r('map("state", boundary = FALSE, col="gray", add = TRUE)')
+#gp.plot()
+#mp <- NULL
+#mapWorld <- borders("world", colour="gray50", fill="gray50") # create a layer of borders
+#mp <- ggplot() + mapWorld
+# 
+##Now Layer the cities on top
+#mp <- mp+ geom_point(aes(x=visit.x, y=visit.y) ,color="blue", size=3)
+#mp
+
+def bar_allsize(incsv,outname,w,h,graphtitle,plotvar):
+    #graphtitle="Total number of reads"
+#robjects.r('mylocation <- c(lon=18,lat=61)')
     robjects.r('library(ggmap)')
-    robjects.r('map <- get_googlemap(maptype ="roadmap",center = c(lon=18,lat=61.5),zoom=4,color="bw")')
+    station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
+    allISfiltersgraph=robjects.r('oio2<-ggplot(data=chosendataset, aes(x=mystation, y='+"n_hit_station/alltranscripts"+',fill="green")) + geom_bar(stat="identity",position=position_dodge())+theme(axis.text.x=element_text(angle=90))')
+    #allISfiltersgraph=robjects.r('oio2<-ggplot(data=chosendataset, aes(x=mystation, y='+plotvar+',fill="mauve")) + geom_bar(stat="identity",position=position_dodge())+theme(axis.text.x=element_text(angle=90))')
+#teest=robjects.r('p<-p+coord_fixed(ratio=400)')
+    robjects.r('oio2 <- oio2+ggtitle("'+graphtitle+'")')
+    robjects.r('oio2 <- oio2+theme(plot.title = element_text(lineheight=.8, face="bold"))')
+    #robjects.r.ggsave("/Users/security/science/ttest.pdf")
+    robjects.r('pdf("'+outname+'", width='+str(w)+',height='+str(h)+')')
+    im4=robjects.r('print(oio2)')
+    robjects.r('dev.off()')
 
-    station_dataset=robjects.r('chosendataset <- read.delim("'+'/Users/security/science/output.csv'+'", sep="," , header=TRUE)')
+    #station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
+    ##station_dataset=robjects.r('chosendataset <- read.delim("'+'/Users/security/science/output.csv'+'", sep="," , header=TRUE)')
+
+    #robjects.r('pdf("'+outname+'")')
+    #robjects.r('oio <- ggmap(map) + geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=alltranscripts))')
+    #robjects.r('oio <- oio + geom_text(data=chosendataset,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
+
+def gogmap_google(incsv,outname,w,h):
+
+#robjects.r('mylocation <- c(lon=18,lat=61)')
+    robjects.r('library(ggmap)')
+    station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
+    #robjects.r('map <- get_googlemap(maptype ="satellite",center = c(lon=18,lat=61.5),zoom=4,color="bw")')
+    robjects.r('map <- get_googlemap(maptype ="hybrid",center = c(lon=18,lat=61.5),zoom=4,color="bw")')
+    #robjects.r('map <- get_googlemap(maptype ="roadmap",center = c(lon=18,lat=61.5),zoom=4,color="bw")')
+    #robjects.r('map <- get_googlemap(maptype ="terrain",center = c(lon=18,lat=61.5),zoom=4,color="bw")')
+
+    station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
     #station_dataset=robjects.r('chosendataset <- read.delim("'+'/Users/security/science/output.csv'+'", sep="," , header=TRUE)')
 
     robjects.r('pdf("'+outname+'")')
@@ -31,34 +130,12 @@ def gogmap_google(incsv,outname):
     im4=robjects.r('print(oio)')
     robjects.r('dev.off()')
 
-def gogmap_ggmap(incsv,outname):
+def with_rworld(incsv,outname,w,h):
 
-    robjects.r('library(ggmap)')
-    robjects.r('library(rgdal)')
-    #robjects.r('map.world <- map_data (map = "world")')
-    robjects.r('map.world<-map.world[-which(getMap()$ADMIN== "Antarctica"),]')
-    robjects.r('map.world <- spTransform(map.world, CRS=CRS("+proj=robin +ellps= WGS84"))')
-
-    station_dataset=robjects.r('chosendataset <- read.delim("'+'/Users/security/science/output.csv'+'", sep="," , header=TRUE)')
-    #station_dataset=robjects.r('chosendataset <- read.delim("'+'/Users/security/science/output.csv'+'", sep="," , header=TRUE)')
-
-    robjects.r('pdf("'+outname+'")')
-    robjects.r('p1 <- ggplot(map.world, aes (x = long, y = lat, group = map.world$group,colour="black"))')
-    robjects.r('p1 <- p1 + geom_path (colour="black")')
-    robjects.r('p1 <- p1 + geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=alltranscripts))')
-    robjects.r('p1 <- p1 + theme (legend.position= "none")')
-    robjects.r('p1 <- p1 + xlim(-10,50)')
-    robjects.r('p1 <- p1 + ylim(50,70)')
-    im4=robjects.r('print(p1)')
-    robjects.r('dev.off()')
-
-def gogmap3(incsv,outname):
-
-
+    station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
 
     robjects.r('library(grid)')
     robjects.r('library(gridExtra)')
-    robjects.r('pushViewport(viewport(layout = grid.layout(1, 2)))')
     
     robjects.r('library(rworldmap)')
     robjects.r('worldMap <- getMap(resolution="high")')
@@ -70,75 +147,150 @@ def gogmap3(incsv,outname):
     robjects.r('m <- ggplot() ')
 
     robjects.r('m<-m +geom_path(data = world.df, aes(x = long, y = lat, group = group))')
+    robjects.r('m<-m + theme(legend.position="none")')
     #robjects.r('m<-m +scale_y_continuous(breaks = (-2:2) * 30)')
     #robjects.r('m<-m +scale_x_continuous(breaks = (-4:4) * 45)')
-    #robjects.r('m<-m +coord_map("ortho", orientation=c(51,40, 0),xlim=c(-10,50),ylim=c(50,70))')
     robjects.r('m<-m +coord_map("ortho", orientation=c(10,16, 0),xlim=c(8,24),ylim=c(54,70))')
-    #robjects.r('m<-m +coord_map("ortho", orientation=c(51,40, 0),xlim=10,ylim=40)')
-    robjects.r('m<-m +geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=1))')
-    #robjects.r('m<-m +geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=chosendataset$alltranscripts))')
-    #im4=robjects.r('g<-multiplot(m,m,col=2)')
-    #robjects.r('m <- m + xlim(-10,50)')
-    #robjects.r('m <- m + ylim(50,70)')
-    #objects.r('geom_point(data = mypoints, aes(x = long, y = lat), color = "blue3")')
-
-    #robjects.r('m<-m + xlim(0, 37) + ylim(53, 70)')
-    #robjects.r('m<-ggplot() + coord_map(xlim = c(-169, -121), ylim = c(45, 70)) + geom_polygon(data = mymap, aes(long, lat, group = group), color = "grey20", fill = "grey15", size = 0.3) + geom_point(data = mypoints, aes(x = long, y = lat), color = "blue3") + xlim(-179, -90) + ylim(30, 80)')
-
+    robjects.r('m<-m +geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=chosendataset$alltranscripts))')
+    robjects.r('m <- m+ geom_text(data=chosendataset,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
    
-    robjects.r('pdf("'+outname+'")')
-    robjects.r('grid.arrange( m, m, ncol=2)')
-    #robjects.r('m <- m + geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=alltranscripts))')
-
-    #robjects.r('oio <- oio + geom_text(data=chosendataset,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
+    #robjects.r('pdf("'+outname+'")')
+    robjects.r('pdf("'+outname+'", width='+str(w)+',height='+str(h)+')')
     im4=robjects.r('print(m)')
-    #im4=robjects.r('print(m, vp = viewport(layout.pos.row = 1, layout.pos.col = 2))')
     robjects.r('dev.off()')
 
 
 
-def gogmap2(incsv,outname):
 
 
+
+
+def gogmap3(incsv_surf,incsv_mid,outname,w,h):
+    robjects.r('library(gridExtra)')
+    robjects.r('library(grid)')
+    robjects.r('library(ggmap)')
     robjects.r('library(rworldmap)')
-
-
-    #newmap <- getMap(resolution = "low")
-
-    #robjects.r('newmap <- getMap(resolution = "low")')
-
-
-    #robjects.r('library(rgdal)')
-    #robjects.r('map.world <- map_data (map = "world")')
-    #robjects.r('map.world<-map.world[-which(getMap()$ADMIN== "Antarctica"),]')
+    robjects.r('library(rworldxtra)')
+# Three bar plots for shallow
+    robjects.r('chosendataset_surf <- read.delim("'+incsv_surf+'", sep="," , header=TRUE)')
 
 
 
-    robjects.r('data("countryExData", envir=environment(), package="rworldmap",asp=1.25)')
-    robjects.r('mymap <- joinCountryData2Map(countryExData, joinCode = "ISO3", nameJoinColumn = "ISO3V10", mapResolution = "high",projection=1.25)')
-    #robjects.r('mymap <- mapCountryData(mymap, aspect=1.25)')
-    #robjects.r('mymap <- spTransform(mymap, CRS=CRS("+proj=robin +ellps=WGS84"))')
-    robjects.r('mymap <- fortify(mymap)') 
-    #robjects.r('mypoints <- data.frame(lat = rep(55, 3), long = c(-145, -147, -149))')
+    mycolorfirst = "%06x" % random.randint(0,0xFFFFFF)
+    mycolor="#"+str(mycolorfirst).upper()
+    mycolor="blue"
+    print mycolor
 
-    robjects.r('m<-ggplot()')
-    #robjects.r('m<-m+ coord_map(xlim = c(-10, 50), ylim = c(50, 70))')
-    robjects.r('m<-m + geom_path(data = mymap, aes(mymap$long, mymap$lat, group = mymap$group), color = "grey20", fill = "grey15", size = 0.3)')
+    graphtitle="Total_number_of_transcripts"
+    plotline='bargall_shallow<-ggplot(data=chosendataset_surf, aes(x=mystation, y='+"alltranscripts"+'),fill="blue",colour="blue")'
+    robjects.r(plotline)
+    #robjects.r('bargall_shallow<-ggplot(data=chosendataset_surf, aes(x=mystation, y='+"alltranscripts"+',fill="'+mycolor+'"))')
+    lol='bargall_shallow<-bargall_shallow+'+get_bar_settings(graphtitle,"Reads_with_ISs")
+    print lol
+    robjects.r(lol)
 
-    robjects.r('m<-m +geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat))')
-    #robjects.r('m<-m +geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=chosendataset$alltranscripts))')
-    #objects.r('geom_point(data = mypoints, aes(x = long, y = lat), color = "blue3")')
+    graphtitle="IS fraction of transcripts"
+    station_dataset=robjects.r('chosendataset_surf_shallow <- read.delim("'+incsv_surf+'", sep="," , header=TRUE)')
+    allISfiltersgraph=robjects.r('bargall_shallow_frac<-ggplot(data=chosendataset_surf_shallow, aes(x=mystation, y='+"n_hit_station/alltranscripts"+',fill="green")) ')
+    lol2='bargall_shallow_frac<-bargall_shallow_frac+'+get_bar_settings(graphtitle,"IS frac. of total")
+    robjects.r(lol2)
 
-    robjects.r('m<-m + xlim(0, 37) + ylim(53, 70)')
-    #robjects.r('m<-ggplot() + coord_map(xlim = c(-169, -121), ylim = c(45, 70)) + geom_polygon(data = mymap, aes(long, lat, group = group), color = "grey20", fill = "grey15", size = 0.3) + geom_point(data = mypoints, aes(x = long, y = lat), color = "blue3") + xlim(-179, -90) + ylim(30, 80)')
+    graphtitle="Number of IS transcripts"
+    station_dataset=robjects.r('chosendataset_surf_shallow <- read.delim("'+incsv_surf+'", sep="," , header=TRUE)')
+    allISfiltersgraph=robjects.r('bargall_shallow_is<-ggplot(data=chosendataset_surf_shallow, aes(x=mystation, y='+"n_hit_station"+',fill="deeppink4")) ')
+    lol3='bargall_shallow_is<-bargall_shallow_is+'+get_bar_settings(graphtitle,"Total reads")
+    robjects.r(lol3)
 
-   
-    robjects.r('pdf("'+outname+'")')
-    #robjects.r('m <- m + geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=alltranscripts))')
+# Three bar plots for medium 
+    station_dataset=robjects.r('chosendataset_mid <- read.delim("'+incsv_mid+'", sep="," , header=TRUE)')
 
-    #robjects.r('oio <- oio + geom_text(data=chosendataset,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
-    im4=robjects.r('print(m)')
+
+    graphtitle="Total_number_of_transcripts"
+    robjects.r('bargall_mid_total_transcripts<-ggplot(data=chosendataset_mid, aes(x=mystation, y='+"alltranscripts"+',fill="'+mycolor+'"))')
+    lol='bargall_mid_total_transcripts<-bargall_mid_total_transcripts+'+get_bar_settings(graphtitle,"Total reads")
+    robjects.r(lol)
+
+    graphtitle="Total number of hits"
+    robjects.r('bargall_mid_total<-ggplot(data=chosendataset_mid, aes(x=mystation, y='+"n_hit_station"+',fill="green"))')
+    lol='bargall_mid_total<-bargall_mid_total+'+get_bar_settings(graphtitle,"Reads with ISs")
+    robjects.r(lol)
+
+    graphtitle="fraction_of_total"
+    robjects.r('bargall_mid_frac<-ggplot(data=chosendataset_mid, aes(x=mystation, y='+"n_hit_station/alltranscripts"+',fill="'+mycolor+'"))')
+    lol='bargall_mid_frac<-bargall_mid_frac+'+get_bar_settings(graphtitle,"IS frac. of total")
+    robjects.r(lol)
+
+
+# Make map
+#########
+
+    robjects.r('worldMap <- getMap(resolution="high")')
+    robjects.r('world.points <- fortify(worldMap)')
+    robjects.r('world.points$region <- world.points$id')
+    robjects.r('world.df <- world.points[,c("long","lat","group", "region")]')
+    robjects.r('geom_polygon(data = world.df, aes(x = long, y = lat, group = group))')
+
+
+    robjects.r('m <- ggplot() ')
+    robjects.r('m<-m +geom_path(data = world.df, size=0.3,aes(x = long, y = lat, group = group))')
+    gostr="m<-m + "+ get_map_settings("","Latitude")
+    robjects.r(gostr)
+
+# scandic view
+    robjects.r('mymap<-m +coord_map("ortho", orientation=c(10,16, 0),xlim=c(8,24),ylim=c(54,70))')
+# space view
+    #robjects.r('m<-m +coord_map("ortho", orientation=c(10,16, 0),xlim=c(-50,49),ylim=c(10,70))')
+
+
+# point size by alltranscripts
+    #graphtitle="title"
+
+
+
+    robjects.r('surf_points<-mymap +geom_point(data=chosendataset_surf,color="red",aes(x=Lon, y = Lat,size=alltranscripts))')
+
+    robjects.r('surf_points <- surf_points+ geom_text(data=chosendataset_surf,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
+    #robjects.r('surf_points<-surf_points +ggtitle("'+graphtitle+'")')
+
+
+
+    robjects.r('mid_points<-mymap +geom_point(data=chosendataset_mid,color="#000000",aes(x=Lon, y = Lat,size=alltranscripts))')
+
+    robjects.r('mid_points <- mid_points+ geom_text(data=chosendataset_mid,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
+    robjects.r('mid_points <- mid_points+ggtitle("'+graphtitle+'")')
+
+
+    robjects.r('pdf("'+outname+'", width='+str(w)+',height='+str(h)+')')
+
+    grid_arrangement='grid.arrange('
+    #grid_arrangement='arrangeGrob('
+    grid_arrangement+='surf_points,'
+    grid_arrangement+='arrangeGrob('
+    grid_arrangement+='bargall_shallow_frac,bargall_shallow_is,bargall_shallow'
+    grid_arrangement+=',ncol=1'
+    grid_arrangement+=',heights=c(2,1,1)),'
+    #grid_arrangement+=',ncol=2)'
+    grid_arrangement+='mid_points,'
+    grid_arrangement+='arrangeGrob(bargall_mid_frac,bargall_mid_total_hits,bargall_mid_total_hits,ncol=1,heights=c(2,1,12,1,1)),'
+    #grid_arrangement+='deep_points,'
+    #grid_arrangement+='arrangeGrob(bargall_deep,bargall_deep,ncol=1),' 
+    grid_arrangement+='ncol=2,'
+    grid_arrangement+='main=textGrob("Insertion sequences in the Baltic Sea 2009", gp = gpar(fontsize=18, fontface="bold.italic", fontsize=18))'
+    grid_arrangement+=',widths=1:1)'
+
+    hh='grid.arrange( arrangeGrob( surf_points,arrangeGrob(bargall_shallow_frac,bargall_shallow_is,bargall_shallow,ncol=1,heights=c(2,1,1)) ,ncol=2,main="Shallow"),arrangeGrob(mid_points,arrangeGrob(bargall_mid_frac,bargall_mid_total_hits,bargall_mid_total_transcripts,ncol=1,heights=c(2,1,1)) ,ncol=2,main="Deep") ,ncol=1,main=textGrob("\nInsertion sequences in the Baltic Sea 2009\n", gp = gpar(fontsize=18, fontface="bold", fontsize=18)),widths=1:1)'
+
+
+
+
+    print grid_arrangement
+    robjects.r(hh)
+    #robjects.r(grid_arrangement)
+    #robjects.r('grid.arrange( surf_points,mid_points,deep_points, ncol=2)')
+
+    #im4=robjects.r('print(m)')
     robjects.r('dev.off()')
+
 
 def getfromcc(name):
     print name
@@ -164,59 +316,34 @@ def getfromcc(name):
     return badst 
 
 parser = argparse.ArgumentParser()
-
-
 #parser.add_argument("-in_csv", help="")
 parser.add_argument("-in_db", help="")
 #parser.add_argument("-in_csv_all", help="")
 parser.add_argument("-out", help="")
 parser.add_argument("-outcsv", help="")
 parser.add_argument("-environmentaldata", help="")
+parser.add_argument("-basepicout", help="")
 
 args=parser.parse_args()
-
+basepicdir=args.basepicout
 metadata="/Users/security/science/RNA/mimebs_metadata/metadata.2009.csv"
 
+# Read environmental csv
+###########
 metafh=open(args.environmentaldata,"r")
 metaread=metafh.read()
 metalines=metaread.split("\n")
 metahead=metalines[0]
 metalines=metalines[1:]
 
-
-
-	
-#robjects.r('library(maps)')
-
-#robjects.r('map("world", interior = FALSE)')
-
-#robjects.r('map("state", boundary = FALSE, col="gray", add = TRUE)')
-#gp.plot()
-
-
-
-
-
-#mp <- NULL
-#mapWorld <- borders("world", colour="gray50", fill="gray50") # create a layer of borders
-#mp <- ggplot() + mapWorld
-# 
-##Now Layer the cities on top
-#mp <- mp+ geom_point(aes(x=visit.x, y=visit.y) ,color="blue", size=3)
-#mp
-
-
-
 #db="/Users/security/science/dest3.db"
 db=args.in_db
 con = sqlite3.connect(db)
 cur = con.cursor()
 
-#
-#columns="orf_id,group_,GS670_3p0"
-groupthing="Cyanobacteria"
-#
-#
+# what columns are there?
+# made with pramga t outcsv
+##############
 csvh=open("/Users/security/Desktop/headers2.csv","r")
 csread=csvh.read()
 css=csread.split("\n")
@@ -284,7 +411,7 @@ summarycsv+="Sample: sum of all hit transcripts at GS670_0p8:,"+str(onesampl)+"\
 
 
 # compile a list with stations
-############
+###########
 stationcsv="name,mystation,filtersize,alltranscripts,n_hit_station,"+metahead.replace("\t",",")+"\n"
 #for mystation in stations:
 #    print "getting hit counts for "+mystation
@@ -325,133 +452,124 @@ robjects.r('library(stats)')
 grdevices = importr('grDevices')
 
 
-#robjects.r('pdf("'+"/Users/security/science/testmap2.pdf"+'",width=10,heigh=10)')
 
 
-# pick only the rows with long values
-
-#ppg=robjects.r('usedataset <- statdataset[! grepl("nod2",statdataset$Lon),]')
-ppg=robjects.r('usedataset <- statdataset')
-print "dataset"
-print ppg
-
-onlysurf=robjects.r('onlysurface<-usedataset[ which("Sampledepth" =="0.30487806"),]')
-
-robjects.r('mylocation <- c(lon=18,lat=61)')
-#print"longs py print"
-#lo=robjects.r('lol<-usedataset$Lon')
-#la=robjects.r('lot<-usedataset$Lat')
-#print lo
-#print la
-#
-#print"longs r print"
-#robjects.r('print(usedataset$Lon)')
-#longlen=robjects.r('xxx<-length(usedataset$Lon)')
-#latlen=robjects.r('xxy<-length(usedataset$Lat)')
-#framelen=robjects.r('framelen<-length(usedataset)')
-#print longlen
-#print latlen
-#print framelen
-#
-##robjects.r('print(usedataset$Lon)')
-#robjects.r('library(mapproj)')
-##robjects.r('map <- get_map(source="google",maptype ="roadmap",location = mylocation, zoom = 4)')
-##robjects.r('map <- get_map(source="google",maptype ="satellite",location = mylocation, zoom = 4)')
-##robjects.r('map <- get_map(source="google",maptype ="terrain",location = mylocation, zoom = 4)')
-#robjects.r('map <- get_googlemap(maptype ="satellite",center = c(lon=18,lat=61.5),zoom=4,color="bw")')
-
-
-
-
-
-
-#robjects.r('oio<-ggmap(map)')
-#robjects.r('map <- get_map(location = "Europe", zoom = 4)')
-
-
-
-
-con4 = sqlite3.connect("/Users/security/science/stationsdb.db")
+# Make stationsdb
+#################
+stations_db_place=basepicdir+"stationsdb.db"
+con4 = sqlite3.connect(stations_db_place)
 cur4 = con4.cursor()
 
 dropstring="DROP TABLE IF EXISTS "+"t"
 cur4.execute(dropstring)
-cur4.execute("CREATE TABLE t (name,mystation,alltranscripts,Lon,Lat,Sampledepth);")
+cur4.execute("CREATE TABLE t (name,mystation,filtersize,n_hit_station,alltranscripts,Lon,Lat,O,Sampledepth);")
 
 with open(args.outcsv+"stats.csv",'r') as fin: # `with` statement available in 2.5+
     # csv.DictReader uses first line in file for column headings by default
     dr = csv.DictReader(fin) # comma is default delimiter
-    to_db = [(i['name'],i['mystation'],i['alltranscripts'] , i['Lon'] ,i['Lat'],i['Sampledepth']) for i in dr]
+    to_db = [(i['name'],i['mystation'],i['filtersize'], i['n_hit_station'],i['alltranscripts'],i['Lon'], i['Lat'],i['O'],i['Sampledepth']) for i in dr]
 
-cur4.executemany("INSERT INTO t (name,mystation,alltranscripts, Lon,Lat,Sampledepth) VALUES (?,?,?, ?,?,?);", to_db)
+cur4.executemany("INSERT INTO t (name,mystation,filtersize,n_hit_station,alltranscripts, Lon,Lat,O,Sampledepth) VALUES (?,?,?, ?,?,?, ?,?,?);", to_db)
 con4.commit()
 
+
+# Made stations db
+############
+
+#make csv for all depths, added filtersizes
+have_lats_filtadd_csv=basepicdir+"have_lats_filtersadd.csv"
+data = cur4.execute("SELECT name,mystation, sum(n_hit_station),sum(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' GROUP BY mystation")
+with open(have_lats_filtadd_csv, 'w') as f:
+    writer = csv.writer(f)
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','Sampledepth'])
+    writer.writerows(data)
+
+graphtitle="Total number of reads"
+#bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_alltranscripts.pdf",10,10,graphtitle,"alltranscripts")
+graphtitle="Total number of rpod"
+#bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_rpods.pdf",10,10,graphtitle,"n_hit_station")
+graphtitle="n_hit_station_alltranscripts"
+#bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_rpods_div_alltranscripts.pdf",10,10,graphtitle,"n_hit_station/alltranscripts")
+#make csv for all depths, all filtersizes
+have_lats_csv=basepicdir+"have_lats.csv"
+data = cur4.execute("SELECT name,mystation, filtersize,n_hit_station,alltranscripts, Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2'")
+with open(have_lats_csv, 'w') as f:
+    writer = csv.writer(f)
+    writer.writerow(['name','mystation','filtersize','n_hit_station','alltranscripts','Lon', 'Lat','Sampledepth'])
+    writer.writerows(data)
+
+#graphtitle="Total number of reads"
+#bar_allsize(have_lats_csv,basepicdir+"allbars_alltranscripts.pdf",10,10,graphtitle,"alltranscripts")
+#graphtitle="Total number of rpod"
+#bar_allsize(have_lats_csv,basepicdir+"allbars_rpods.pdf",10,10,graphtitle,"n_hit_station")
+#graphtitle="n_hit_station_alltranscripts"
+#bar_allsize(have_lats_csv,basepicdir+"allbars_rpods_div_alltranscripts.pdf",10,10,graphtitle,"n_hit_station/alltranscripts")
+#
+# Collect data with filter sizes
+#data = cur4.execute("SELECT name,mystation, alltranscripts, Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806")
+
+surfLats_csv=basepicdir+"surf_lats.csv"
+# Make database with latitudes with sampledepth < 0.3
+#######################
 #data = cur4.execute("SELECT * FROM t")
 #data = cur4.execute("SELECT * FROM t WHERE Lat!='nod2'")
-data = cur4.execute("SELECT name,mystation, SUM(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
-
-with open('/Users/security/science/output.csv', 'w') as f:
+data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
+with open(surfLats_csv, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(['name','mystation','alltranscripts','Lon', 'Lat','Sampledepth'])
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','Sampledepth'])
+    writer.writerows(data)
+
+    
+surfLats_csv2=basepicdir+"surf_lats2.csv"
+# Make database with latitudes with sampledepth < 0.3
+#######################
+#data = cur4.execute("SELECT * FROM t")
+#data = cur4.execute("SELECT * FROM t WHERE Lat!='nod2'")
+data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
+with open(surfLats_csv2, 'w') as f:
+    writer = csv.writer(f)
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','Sampledepth'])
     writer.writerows(data)
 
 
-gogmap_google(args.outcsv+"stats.csv","/Users/security/science/surfacemap.pdf")
+# write surface maps
+#gogmap_google(surfLats_csv,basepicdir+"surface_hybrid_map.pdf",10,10)
+#with_rworld(surfLats_csv,basepicdir+"surface_rworld.pdf",10,10)
+#gogmap_google('/Users/security/science/output.csv',"/Users/security/science/surfacemap.pdf")
 
 
-
-data = cur4.execute("SELECT name,mystation, SUM(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>0.30487806 AND cast(Sampledepth as float)<20 GROUP BY mystation")
-
-with open('/Users/security/science/output.csv', 'w') as f:
+midLats_csv=basepicdir+"mid_lats.csv"
+# Make database with latitudes with sampledepth < middle
+#######################
+data = cur4.execute("SELECT name,mystation, sum(n_hit_station),SUM(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>0.30487806 AND cast(Sampledepth as float)<20 GROUP BY mystation")
+with open(midLats_csv, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(['name','mystation','alltranscripts','Lon', 'Lat','Sampledepth'])
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','Sampledepth'])
     writer.writerows(data)
 
-gogmap_google(args.outcsv+"stats.csv","/Users/security/science/middlemap.pdf")
+#gogmap_google(midLats_csv,basepicdir+"middle_hybrid_map.pdf",10,10)
+#with_rworld(midLats_csv,basepicdir+"middlemap_rworld.pdf",10,10)
 
-data = cur4.execute("SELECT name,mystation, SUM(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>20 AND cast(Sampledepth as float)<200 GROUP BY mystation")
 
-with open('/Users/security/science/output.csv', 'w') as f:
-    writer = csv.writer(f)
-    writer.writerow(['name','mystation','alltranscripts','Lon', 'Lat','Sampledepth'])
-    writer.writerows(data)
 
-gogmap3(args.outcsv+"stats.csv","/Users/security/science/deepmap.pdf")
-#station_dataset=robjects.r('chosendataset <- read.delim("'+'/Users/security/science/output.csv'+'", sep="," , header=TRUE)')
-#nonsurf=robjects.r('nosurf<-chosendataset[which(chosendataset$Sampledepth !=0.30487806),]')
-#onlysurf=robjects.r('chosendataset<-chosendataset[which(chosendataset$Sampledepth ==0.30487806),]')
-##onlysurf0=robjects.r('chosendataset0<-chosendataset[which(chosendataset$Sampledepth >0.30487806),]')
-#print onlysurf
-#
-#robjects.r('s <- map_data("world")')
-#
-#robjects.r('m <- ggplot(s, aes(x=long, y=lat, group=group)) + geom_polygon(fill="white", colour="black")')
-#robjects.r('print(m)')
-#
-#
-#
-#robjects.r('pdf("'+"/Users/security/science/testmap3.pdf"+'")')
-#
-#robjects.r('library(rworldmap)') 
-#robjects.r('newmap <- getMap(resolution = "high")') 
-#robjects.r('nmap<-plot(newmap, xlim = c(5, 30), ylim = c(53, 69), asp = 1)')
-#robjects.r('points(18, 62, col = "red", cex = .6)')	
-#robjects.r('dev.off()')
-#
-#robjects.r('pdf("'+"/Users/security/science/testmap2.pdf"+'")')
-#robjects.r('oio <- ggmap(map) + geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=alltranscripts))')
-##robjects.r('oio <- oio + aes_string(x=Lon, y = Lat,label=name)')
-##robjects.r('oio <- oio + geom_text(data=chosendataset,aes(x=Lon,y=Lat,label=mystation,size=60),hjust=0, vjust=0)')
-#robjects.r('oio <- oio + geom_text(data=chosendataset,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
-#robjects.r('oio <- oio + geom_text(data=nosurf,size=3,color="blue",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=0.7)')
-#
-#
-##robjects.r('oio <- ggmap(map) + geom_point(aes(x = Lon, y = Lat, size = 20,data=usedataset,color="red"))')
-##robjects.r('oio <- ggmap(map) + geom_point(aes(x = 18, y = 62, size = 200), alpha = .5)')
-#im4=robjects.r('print(oio)')
-#
-#
-#robjects.r('dev.off()')
+#deepLats_csv=basepicdir+"deep_lats.csv"
+## Deep lvl
+#################
+#data = cur4.execute("SELECT name,mystation, SUM(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>20 AND cast(Sampledepth as float)<200 GROUP BY mystation")
+#with open(deepLats_csv, 'w') as f:
+#    writer = csv.writer(f)
+#    writer.writerow(['name','mystation','alltranscripts','Lon', 'Lat','Sampledepth'])
+#    writer.writerows(data)
+
+
+#gogmap_google(deepLats_csv,basepicdir+"deep_hybrid_map.pdf",10,10)
+#with_rworld (deepLats_csv,basepicdir+"deep_rworld_map.pdf",10,10)
+
+
+gogmap3(surfLats_csv,midLats_csv,basepicdir+"deep_map_multi.pdf",10,10)
+
+
+
 
 #for filtersize in ["0p1","0p8","3p0"]:
 #

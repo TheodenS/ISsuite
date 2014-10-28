@@ -173,9 +173,11 @@ print hsp_counter
 #os.system(newbline)
 print "len genomesdic keys"
 print len(genomesdic.keys())
+raw_input("len")
 
 gen_in_genomesdic=0
 for gen in genomesdic.keys():
+        
         gen_in_genomesdic+=1
 	allfeatures=[]
 

@@ -100,6 +100,7 @@ outfh.write(outrow)
 outfh.close()
 
 outfh=open(args.contigxls_isinfo_join_csv,"w")
+print "wrote to "+str(args.contigxls_isinfo_join_csv)
 outfh.write(outrow)
 outfh.close()
 

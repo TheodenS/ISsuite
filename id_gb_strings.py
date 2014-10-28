@@ -88,10 +88,10 @@ def doblast(isseq,sentevalue,blastdb):
                 dic["expect"]=hsp.expect
                 dic["frame"]=hsp.frame
                 dic["bits"]=hsp.bits
-                dic["query"]=str(hsp.query)
+                dic["query"]=str(hsp.query).replace(" ","")
                 dic["query_end"]=hsp.query_end
                 dic["query_start"]=hsp.query_start
-                dic["sbjct"]=str(hsp.sbjct)
+                dic["sbjct"]=str(hsp.sbjct).replace(" ","")
                 dic["score"]=hsp.score
                 dic["align_length"]=hsp.align_length
                 hsps.append(dic)
