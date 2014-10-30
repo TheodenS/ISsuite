@@ -237,7 +237,7 @@ prog="/Users/security/science/software/ISsuite/"+"foundislengthhistogram.py"
 runstring="python "+prog 
 runstring+=" -in_csv "+contigs_with_is_csv
 runstring+=" -out "+foundishistogram
-os.system(runstring)
+#os.system(runstring)
 
 
 # outputs list with numkey,placename,station,depth,total transcripts, hittranscripts,fraction
