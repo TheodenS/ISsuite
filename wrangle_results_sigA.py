@@ -18,6 +18,58 @@ import datetime
 import csv
 import random
 
+def singleplot(yvar):
+    # NH4
+    ####################
+    pointsize=str(3)
+    axistextsize=str(3)
+    yvar_in="modeldata$"+yvar
+    modelmkstring=yvar+'plot<-ggplot(data=modeldata, aes(x=fraction, y='+yvar_in+',fill="green"))'
+    modelmkstring+='+ geom_point(data=modeldata,aes(x=fraction, y='+yvar_in+',color="blue", size='+pointsize+'))'
+    modelmkstring+='+stat_smooth(data=modeldata,method = "lm", se=TRUE, color="black", formula = y ~ x)'
+    modelmkstring+='+scale_y_continuous("'+yvar+'")'
+    modelmkstring+='+ggtitle("'+yvar+'")'
+    #robjects.r('corstats<-cor.test('+yvar_in+' , modeldata$fraction,model="person")')
+
+    modelmkstring+='+theme('
+    modelmkstring+='axis.title.x=element_text(lineheight=1)'
+    modelmkstring+=',axis.text.x=element_text(size='+axistextsize+',angle=0)'
+    modelmkstring+=',axis.text.y=element_text(size='+axistextsize+',angle=0)'
+    modelmkstring+=',legend.position="none"'
+    modelmkstring+=',plot.title = element_text(lineheight=1, face="bold")'
+    modelmkstring+=')'
+    #robjects.r(modelmkstring) 
+
+    return modelmkstring
+
+#arrangeGrob(bargall_mid_frac,bargall_mid_total_transcripts,bargall_mid_hits,ncol=1,heights=c(2,1,12,1,1))
+
+    
+    #'oio2<-mp <- mp+ geom_point(aes(x=visit.x, y=visit.y) ,color="blue", size=3) 
+#teest=robjects.r('p<-p+coord_fixed(ratio=400)')
+
+def make_blank_window(statvar):
+    textsize=str(3)
+    make_text_plot='+scale_x_continuous(limits=c(1, 100))'
+    make_text_plot+='+scale_y_continuous(limits=c(1, 100))'
+
+    make_text_plot+='+geom_text(aes(x = 5, y = 85, label = paste("p-value: ",round('+statvar+'$p.value,3))), size='+textsize+',data = textdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 45, label = paste("rho: ",round('+statvar+'$estimate,3))), size='+textsize+',data = textdf, colour = I("black"),hjust=0)'
+
+    make_text_plot+='+theme('
+    make_text_plot+='legend.position="none"'
+    make_text_plot+=',axis.title.x=element_blank()'
+    make_text_plot+=',axis.title.y=element_blank()'
+    make_text_plot+=',axis.text.x=element_blank()'
+    make_text_plot+=',axis.text.y=element_blank()'
+    make_text_plot+=',axis.ticks = element_blank()'
+    make_text_plot+=',panel.grid.minor=element_blank()'
+    make_text_plot+=',panel.grid.major=element_blank()'
+    make_text_plot+=',panel.border=element_blank()'
+    make_text_plot+=',panel.background = element_rect(fill="white", colour="black")'
+    make_text_plot+=')'
+    return make_text_plot
+
 
 def get_map_settings(title,yname):
 #graphtitle="TESTTI"
@@ -82,31 +134,31 @@ def get_line_settings(title,yname):
     mycolorfirst = "%06x" % random.randint(0,0xFFFFFF)
     mycolor="#"+str(mycolorfirst).upper()
     print mycolor
-    plottitlesize=str(8)
-    axistextsize=str(8)
-    axistitlesize=str(8)
+    plottitlesize=str(6)
+    axistextsize=str(5)
+    axistitlesize=str(4)
+    legendsize=str(4)
     xname="station"
 
     robjects.r('library(scales)')
-    #bar_settings='geom_bar(stat="identity",position=position_dodge(),fill="'+mycolor+'")'    
-    #line_settings='geom_line(data=chosendataset_surf,fill="blue",aes(x=mystation, y=1))'
-    #line_settings='geom_line(data=chosendataset_surf,fill="blue",aes(x=mystation, y=Sal))'
+    env_vars=['pH','NH4','Chla','P']
     line_settings='geom_line(data=chosendataset_surf,aes(x=mystation, y=scale(Temp),group=2,color="Temp"))'
     line_settings+='+geom_line(data=chosendataset_surf,aes(x=mystation, y=scale(Sal),group=2,color="Sal"))'
-    line_settings+='+geom_line(data=chosendataset_surf,aes(x=mystation, y=scale(O),group=2,color="O"))'
+    for env_var in env_vars:
+        line_settings+='+geom_line(data=chosendataset_surf,aes(x=mystation, y=scale('+env_var+'),group=2,color="'+env_var+'"))'
 
     #bar_settings+='+ggtitle("'+title+mycolor+'")' 
     line_settings+='+theme('
     line_settings+='plot.title = element_text(size='+plottitlesize+',lineheight=0.8)'
-    #bar_settings+=',axis.text.x=element_text(size='+axistextsize+',angle=0)'
-    #bar_settings+=',axis.text.y=element_text(size='+axistextsize+',angle=0)'
-    #bar_settings+=',axis.title.x=element_blank()'
-    #bar_settings+=',axis.title.y=element_text(size='+axistitlesize+')'
+    line_settings+=',axis.text.x=element_text(size='+axistextsize+',angle=0)'
+    line_settings+=',axis.text.y=element_text(size='+axistextsize+',angle=0)'
+    line_settings+=',axis.title.y=element_blank()'
+    line_settings+=',axis.title.x=element_blank()'
+    line_settings+=',legend.key.size=unit(0.7,"lines")'
     line_settings+=',legend.position="bottom"'
     line_settings+=')'
 
-    ##bar_settings+='+geom_text(size=3,color="red",aes(x=0,y=0,label="'+mycolor+'"))'
-    #bar_settings+='+scale_x_discrete(name="'+xname+'")'     
+    line_settings+='+scale_x_discrete(name="'+xname+'")'     
     #bar_settings+=''     
     #bar_settings+='+scale_y_continuous(labels=comma, name="'+yname+'")'     
 
@@ -140,6 +192,64 @@ def bar_allsize(incsv,outname,w,h,graphtitle,plotvar):
     #robjects.r.ggsave("/Users/security/science/ttest.pdf")
     robjects.r('pdf("'+outname+'", width='+str(w)+',height='+str(h)+')')
     im4=robjects.r('print(oio2)')
+    robjects.r('dev.off()')
+
+def make_model(incsv,outname,w,h,graphtitle,plotvar):
+    robjects.r('library(ggmap)')
+    station_dataset=robjects.r('modeldata <- read.delim("'+incsv+'", sep="," , header=TRUE)')
+    
+    robjects.r('modeldata$fraction<-modeldata$n_hit_station/modeldata$alltranscripts')
+
+    envarlist=["alltranscripts","NH4","Temp","Sal","NO3","P"]
+    for envar in envarlist:
+        yvar_in="modeldata$"+envar
+        robjects.r(envar+'stats<-cor.test('+yvar_in+' , modeldata$fraction,model="spearman")')
+        robjects.r(singleplot(envar))
+        robjects.r('xvars<-1:100')
+        robjects.r('yvars<-1:100')
+        robjects.r('textdf<-data.frame(xvars,yvars)')
+        make_text_plot=envar+'Tplot<-ggplot(data=plotdf, aes(x=xvars, y=yvars))'     
+        make_text_plot+=make_blank_window(envar+"stats")
+        robjects.r(make_text_plot)
+
+    #robjects.r.ggsave("/Users/security/science/ttest.pdf")
+    robjects.r('pdf("'+outname+'", width='+str(w)+',height='+str(h)+')')
+
+    gridline='grid.arrange('
+
+    for envar in envarlist:
+        gridline+='arrangeGrob('+envar+'plot,'+envar+'Tplot,ncol=1,heights=c(2,1)),'
+    #gridline=gridline[:-1]
+    gridline+='ncol=2)'
+    print gridline
+    robjects.r(gridline)
+
+    robjects.r('dev.off()')
+
+
+def makepairs(incsv,outname,w,h,graphtitle,plotvar):
+    gal = importr('GGally')
+
+    robjects.r('png("'+outname+'",width=2000,heigh=2000)')
+    station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
+    robjects.r('keeps <- c("n_hit_station","alltranscripts","Chla","O","Temp","Sal","pH","N","NO3","NO2","NH4","DOP","NP","P","N","PO4","Urea","Si","Sampledepth")')
+    #robjects.r('keeps <- c("n_hit_station","alltranscripts","Chla","Lon","Lat","O","Sampledepth","Temp","Sal","pH","NO3","NO2","NH4","Urea","PO4","Si","DOP","NP","P","N","OXY")')
+
+    #robjects.r('keeps <- c("n_hit_station","alltranscripts","Lon","Lat","Thermocline","ChlorophyllMaxDepth","O","Sampledepth","Temp","Sal","pH","Chla","NO3","NO2","NH4","Urea","PO4","Si","DOP","NP","P","N","OXY")')
+    #robjects.r('keeps <- c("n_hit_station","alltranscripts","ChlMax","Lon","Lat","Water(m)","Thermocline","ChlorophyllMaxDepth","O","Sampledepth","Temp","Sal","pH","Chla","NO3","NO2","NH4","Urea","PO4","Si","DOP","NP","P","N","OXY")')
+
+
+
+
+
+
+    robjects.r('factors<-chosendataset[keeps]')
+    robjects.r('factors$fraction<-factors$n_hit_station/factors$alltranscripts')
+    im4=robjects.r('environpairspic<-ggpairs(factors,diag=list(labelSize=4),upper = list(params = c(size = 4)),lower = list(continuous = "smooth", size=0.01,params = c(colour="red",method = "lm")))')
+    envpairs=robjects.r('print(environpairspic)')
+#gp = ggplot2.ggplot(dataf)
+#gp = ggplot2.ggpairs(dataf)
+#robjects.r('ggsave("/Users/security/science/new3.pdf")')
     robjects.r('dev.off()')
 
 def bars(incsv,outname,w,h,graphtitle,plotvar):
@@ -292,8 +402,8 @@ def gogmap_google(incsv,outname,w,h):
     #station_dataset=robjects.r('chosendataset <- read.delim("'+'/Users/security/science/output.csv'+'", sep="," , header=TRUE)')
 
     robjects.r('pdf("'+outname+'")')
-    robjects.r('oio <- ggmap(map) + geom_point(data=chosendataset,color="red",aes(x=Lon, y = Lat,size=alltranscripts))')
-    robjects.r('oio <- oio + geom_text(data=chosendataset,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
+    robjects.r('oio <- ggmap(map) + geom_point(geom_point(position = "jitter"),data=chosendataset,color="red",aes(x=Lon, y = Lat,size=alltranscripts1))')
+    robjects.r('oio <- oio + geom_text(geom_point(position = "jitter"),data=chosendataset,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
     im4=robjects.r('print(oio)')
     robjects.r('dev.off()')
 
@@ -329,9 +439,6 @@ def with_rworld(incsv,outname,w,h):
 
 
 
-
-
-
 def gogmap3(incsv_surf,incsv_mid,outname,w,h):
     robjects.r('library(gridExtra)')
     robjects.r('library(grid)')
@@ -352,24 +459,24 @@ def gogmap3(incsv_surf,incsv_mid,outname,w,h):
     lol2='bargall_shallow_frac<-bargall_shallow_frac+'+get_bar_settings(graphtitle,"IS frac. of total")
     robjects.r(lol2)
 
-    graphtitle="Number of IS transcripts"
-    station_dataset=robjects.r('chosendataset_surf_shallow <- read.delim("'+incsv_surf+'", sep="," , header=TRUE)')
-    allISfiltersgraph=robjects.r('bargall_shallow_is<-ggplot(data=chosendataset_surf_shallow, aes(x=mystation, y='+"n_hit_station"+',fill="deeppink4")) ')
-    lol3='bargall_shallow_is<-bargall_shallow_is+'+get_bar_settings(graphtitle,"Total reads")
-    robjects.r(lol3)
+    #graphtitle="Number of IS transcripts"
+    #station_dataset=robjects.r('chosendataset_surf_shallow <- read.delim("'+incsv_surf+'", sep="," , header=TRUE)')
+    #allISfiltersgraph=robjects.r('bargall_shallow_is<-ggplot(data=chosendataset_surf_shallow, aes(x=mystation, y='+"n_hit_station"+',fill="deeppink4")) ')
+    #lol3='bargall_shallow_is<-bargall_shallow_is+'+get_bar_settings(graphtitle,"Total reads")
+    #robjects.r(lol3)
 
 
-    graphtitle="Total number of transcripts"
-    plotline='bargall_shallow<-ggplot(data=chosendataset_surf, aes(x=mystation, y='+"alltranscripts"+'),fill="blue",colour="blue")'
-    robjects.r(plotline)
-    lol='bargall_shallow<-bargall_shallow+'+get_bar_settings(graphtitle,"Number of reads")
-    robjects.r(lol)
+    #graphtitle="Total number of transcripts"
+    #plotline='bargall_shallow<-ggplot(data=chosendataset_surf, aes(x=mystation, y='+"alltranscripts"+'),fill="blue",colour="blue")'
+    #robjects.r(plotline)
+    #lol='bargall_shallow<-bargall_shallow+'+get_bar_settings(graphtitle,"Number of reads")
+    #robjects.r(lol)
 
     graphtitle="Environmental variables"
-    plotline='environment_shallow<-ggplot(data=chosendataset_surf, aes(x=mystation, y='+"Sal"+'),fill="blue",colour="blue")'
+    plotline='environment_shallow<-ggplot(data=chosendataset_surf)'
     robjects.r(plotline)
     #lol2='environment_shallow<-environment_shallow'
-    lol2='environment_shallow<-environment_shallow+'+get_line_settings(graphtitle,"nonnormalized")
+    lol2='environment_shallow<-environment_shallow+'+get_line_settings(graphtitle,"normalized")
     robjects.r(lol2)
 
 
@@ -417,8 +524,12 @@ def gogmap3(incsv_surf,incsv_mid,outname,w,h):
 # point size by alltranscripts
     #graphtitle="title"
 
-    robjects.r('surf_points<-mymap +geom_point(data=chosendataset_surf,color="red",aes(x=Lon, y = Lat,size=alltranscripts))')
+    robjects.r('surf_points<-mymap +geom_point(data=chosendataset_surf,color="red",aes(x=Lon, y = Lat,shape=1,size=n_hit_station/alltranscripts))')
+    #robjects.r('surf_points<-mymap +geom_point(data=chosendataset_surf,color="red",aes(geom_point(position = "jitter"),x=Lon, y = Lat,size=n_hit_station/alltranscripts))')
 
+
+    robjects.r('surf_points<-mymap +geom_point(data=chosendataset_surf,color="blue",aes(x=Lon, y = Lat,size=alltranscripts))')
+    #robjects.r('surf_points<-mymap +geom_point(geom_point(data=chosendataset_surf,color="blue",aes(position = "jitter"),x=Lon, y = Lat,size=alltranscripts))')
     robjects.r('surf_points <- surf_points+ geom_text(data=chosendataset_surf,size=3,color="red",aes(x=Lon,y=Lat,label=mystation),hjust=0.5, vjust=-0.7)')
     #robjects.r('surf_points<-surf_points +ggtitle("'+graphtitle+'")')
 
@@ -519,6 +630,7 @@ csvh=open("/Users/security/Desktop/headers2.csv","r")
 csread=csvh.read()
 css=csread.split("\n")
 
+
 heads=[]
 for u in css:
     if u=="":
@@ -552,6 +664,13 @@ print "dethg"
 print dethg
 
 
+
+
+
+robjects.r('library(reshape2)')
+robjects.r('library(RColorBrewer)')
+robjects.r('library(stats)')
+
 summarycsv=""
 
 
@@ -584,45 +703,41 @@ summarycsv+="Sample: sum of all hit transcripts at GS670_0p8:,"+str(onesampl)+"\
 # compile a list with stations
 ###########
 stationcsv="name,mystation,filtersize,alltranscripts,n_hit_station,"+metahead.replace("\t",",")+"\n"
-#for mystation in stations:
-#    print "getting hit counts for "+mystation
-#    stat_loc=mystation.split("_")[0]
-#    stat_filt=mystation.split("_")[1]
-#
-#    columns="SUM("+mystation+")"
-#    selstring="SELECT "+columns+" FROM allist"
-#    with con:
-#            cur.execute(selstring)
-#    reply=cur.fetchall()
-#    onesampl=reply[0][0]
-#
-#    columns="SUM("+mystation+")"
-#    selstring="SELECT "+columns+" FROM allist WHERE hit_abb!='nod'"
-#    with con:
-#            cur.execute(selstring)
-#    reply=cur.fetchall()
-#    hitcount=reply[0][0]
-#
-#    stationcsv+=mystation+","+stat_loc+","+stat_filt+","+str(onesampl)+","+str(hitcount)+","+getfromcc(mystation.split("_")[0])+"\n"
-##
-#open(args.outcsv,"w").write(summarycsv)
-#fhh=open(args.outcsv+"stats.csv","w")
-#fhh.write(stationcsv)
-#fhh.close()
+if not os.path.isfile(args.outcsv+"stats.csv"):
+    for mystation in stations:
+        print "getting hit counts for "+mystation
+        stat_loc=mystation.split("_")[0]
+        stat_filt=mystation.split("_")[1]
 
+        columns="SUM("+mystation+")"
+        selstring="SELECT "+columns+" FROM allist"
+        with con:
+                cur.execute(selstring)
+        reply=cur.fetchall()
+        onesampl=reply[0][0]
 
+        columns="SUM("+mystation+")"
+        selstring="SELECT "+columns+" FROM allist WHERE hit_abb!='nod'"
+        with con:
+                cur.execute(selstring)
+        reply=cur.fetchall()
+        hitcount=reply[0][0]
+
+        stationcsv+=mystation+","+stat_loc+","+stat_filt+","+str(onesampl)+","+str(hitcount)+","+getfromcc(mystation.split("_")[0])+"\n"
+#
+    open(args.outcsv,"w").write(summarycsv)
+    fhh=open(args.outcsv+"stats.csv","w")
+    fhh.write(stationcsv)
+    fhh.close()
+
+# Main station info csv
+###################
 station_dataset=robjects.r('statdataset <- read.delim("'+args.outcsv+"stats.csv"+'", sep="," , header=TRUE)')
 print station_dataset
-
 robjects.r('attach(statdataset)')
 
-robjects.r('library(reshape2)')
-robjects.r('library(RColorBrewer)')
-robjects.r('library(stats)')
 
 grdevices = importr('grDevices')
-
-
 
 
 # Make stationsdb
@@ -633,14 +748,14 @@ cur4 = con4.cursor()
 
 dropstring="DROP TABLE IF EXISTS "+"t"
 cur4.execute(dropstring)
-cur4.execute("CREATE TABLE t (name,mystation,filtersize,n_hit_station,alltranscripts,Lon,Lat,O,Sampledepth,Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY);")
+cur4.execute('CREATE TABLE t (name,mystation,filtersize,n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon,Lat,"Water(m)","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth,Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY);')
 
 with open(args.outcsv+"stats.csv",'r') as fin: # `with` statement available in 2.5+
     # csv.DictReader uses first line in file for column headings by default
     dr = csv.DictReader(fin) # comma is default delimiter
-    to_db = [(i['name'],i['mystation'],i['filtersize'], i['n_hit_station'],i['alltranscripts'],i['Lon'], i['Lat'],i['O'],i['Sampledepth'],i['Temp'],i['Sal'],i['pH'],i['Chla'],i['NO3'],i['NO2'],i['NH4'],i['Urea'],i['PO4'],i['Si'],i['DOP'],i['NP'],i['P'],i['N'],i['OXY']) for i in dr]
+    to_db = [(i['name'],i['mystation'],i['filtersize'], i['n_hit_station'],i['alltranscripts'],i['Basin'],i['Size'],i['ChlMax'],i['Lon'], i['Lat'],i['Water(m)'],i['Water (Ft)'],i['Thermocline'],i['ChlorophyllMaxDepth'],i['O'],i['Sampledepth'],i['Temp'],i['Sal'],i['pH'],i['Chla'],i['NO3'],i['NO2'],i['NH4'],i['Urea'],i['PO4'],i['Si'],i['DOP'],i['NP'],i['P'],i['N'],i['OXY']) for i in dr]
 
-cur4.executemany("INSERT INTO t (name,mystation,filtersize, n_hit_station,alltranscripts,Lon, Lat,O,Sampledepth, Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY) VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", to_db)
+cur4.executemany('INSERT INTO t (name,mystation,filtersize, n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon, Lat,"Water(m)","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth, Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY) VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);', to_db)
 con4.commit()
 
 
@@ -649,11 +764,13 @@ con4.commit()
 
 #make csv for all depths, added filtersizes
 have_lats_filtadd_csv=basepicdir+"have_lats_filtersadd.csv"
-data = cur4.execute("SELECT name,mystation, sum(n_hit_station),sum(alltranscripts), Lon, Lat, O,Sampledepth Temp, Sal FROM t WHERE Lat!='nod2' GROUP BY mystation")
+data = cur4.execute('SELECT name,mystation, sum(n_hit_station),sum(alltranscripts), ChlMax,Lon, Lat,"Water(m)" AS Water,"Water (Ft)",Thermocline,ChlorophyllMaxDepth, O,Sampledepth Temp, Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!="nod2" GROUP BY mystation')
 with open(have_lats_filtadd_csv, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal'])
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','ChlMax','Lon', 'Lat','Water','Water (Ft)','Thermocline','ChlorophyllMaxDepth','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
     writer.writerows(data)
+
+
 
 # Make bar graphs with filtersizes added
 graphtitle="Total number of reads"
@@ -665,17 +782,18 @@ bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_rpods_div_alltranscripts.p
 
 # Make more bar graphs with added filtersizes
 bars(have_lats_filtadd_csv,basepicdir+"bars_ouput.pdf",10,10,graphtitle,"alltranscripts")
+makepairs(have_lats_filtadd_csv,basepicdir+"environmental_pairs.png",10,10,graphtitle,"alltranscripts")
 
-
+make_model(have_lats_filtadd_csv,basepicdir+"model.pdf",5,10,"graphtitle","model")
 
 
 
 #make csv for all depths, all filtersizes
 have_lats_csv=basepicdir+"have_lats.csv"
-data = cur4.execute("SELECT name,mystation, filtersize,n_hit_station,alltranscripts, Lon, Lat, O,Sampledepth, Temp,Sal FROM t WHERE Lat!='nod2'")
+data = cur4.execute("SELECT name,mystation, filtersize,n_hit_station,alltranscripts, Lon, Lat, O,Sampledepth, Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2'")
 with open(have_lats_csv, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal'])
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
     writer.writerows(data)
 
 #graphtitle="Total number of reads"
@@ -693,10 +811,10 @@ surfLats_csv=basepicdir+"surf_lats.csv"
 #######################
 #data = cur4.execute("SELECT * FROM t")
 #data = cur4.execute("SELECT * FROM t WHERE Lat!='nod2'")
-data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth ,Temp, Sal  FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
+data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth ,Temp, Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
 with open(surfLats_csv, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal'])
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
     writer.writerows(data)
 
     
@@ -707,10 +825,10 @@ surfLats_csv2=basepicdir+"surf_lats2.csv"
 #######################
 #data = cur4.execute("SELECT * FROM t")
 #data = cur4.execute("SELECT * FROM t WHERE Lat!='nod2'")
-data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth, Temp,Sal  FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
+data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth, Temp,Sal ,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
 with open(surfLats_csv2, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal'])
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
     writer.writerows(data)
 
 
@@ -723,10 +841,10 @@ with open(surfLats_csv2, 'w') as f:
 midLats_csv=basepicdir+"mid_lats.csv"
 # Make database with latitudes with sampledepth < middle
 #######################
-data = cur4.execute("SELECT name,mystation, sum(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth, Temp, Sal FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>0.30487806 AND cast(Sampledepth as float)<20 GROUP BY mystation")
+data = cur4.execute("SELECT name,mystation, sum(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth, Temp, Sal ,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>0.30487806 AND cast(Sampledepth as float)<20 GROUP BY mystation")
 with open(midLats_csv, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal'])
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
     writer.writerows(data)
 
 #gogmap_google(midLats_csv,basepicdir+"middle_hybrid_map.pdf",10,10)
