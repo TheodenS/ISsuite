@@ -16,17 +16,17 @@ args=parser.parse_args()
 basedir=args.basedir
 
 
-
+environmentaldata="/Users/security/science/RNA/mimebs_metadata/metadata.2009.csv"
 
 # Make dirs
 if not os.path.isdir(args.basedir):
      os.makedirs(args.basedir)
 
-environmentaldata="/Users/security/science/RNA/mimebs_metadata/metadata.2009.csv"
+
 
 
 if True:
-    prog="/Users/security/science/software/ISsuite/"+"read_resultsdata_make_stations_stats.py"
+    prog="/Users/security/science/software/ISsuite/"+"makestats_with_is_cpc_rpod.py"
     runstring="python "+prog
 
     runstring+=" -in_db="+basedir+"appended_large.db"

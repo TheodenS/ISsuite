@@ -198,12 +198,14 @@ def bar_allsize(incsv,outname,w,h,graphtitle,plotvar):
     robjects.r('dev.off()')
 
 def make_model(incsv,outname,w,h,graphtitle,plotvar):
+    robjects.r('library(gridExtra)')
     robjects.r('library(ggmap)')
     station_dataset=robjects.r('modeldata <- read.delim("'+incsv+'", sep="," , header=TRUE)')
     
-    robjects.r('modeldata$fraction<-modeldata$n_hit_station/modeldata$alltranscripts')
+    #robjects.r('modeldata$fraction<-modeldata$n_hit_station/modeldata$alltranscripts')
+    robjects.r('modeldata$fraction<-modeldata$n_hit_station/modeldata$sig_a_alltranscripts')
 
-    envarlist=["alltranscripts","NH4","Temp","Sal","NO3","P"]
+    envarlist=["alltranscripts","NH4","Temp","Urea","NO2","NP","PO4","N","P","NP","DOP","pH","Sal"]
     for envar in envarlist:
         yvar_in="modeldata$"+envar
         robjects.r(envar+'stats<-cor.test(modeldata$fraction,'+yvar_in+',model="spearman")')
@@ -211,7 +213,7 @@ def make_model(incsv,outname,w,h,graphtitle,plotvar):
         robjects.r('xvars<-1:100')
         robjects.r('yvars<-1:100')
         robjects.r('textdf<-data.frame(xvars,yvars)')
-        make_text_plot=envar+'Tplot<-ggplot(data=plotdf, aes(x=xvars, y=yvars))'     
+        make_text_plot=envar+'Tplot<-ggplot(data=textdf, aes(x=xvars, y=yvars))'     
         make_text_plot+=make_blank_window(envar+"stats")
         robjects.r(make_text_plot)
 
@@ -235,25 +237,26 @@ def makepairs(incsv,outname,w,h,graphtitle,plotvar):
 
     robjects.r('png("'+outname+'",width=2000,heigh=2000)')
     station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
-    robjects.r('keeps <- c("n_hit_station","alltranscripts","Chla","O","Temp","Sal","pH","N","NO3","NO2","NH4","DOP","NP","P","N","PO4","Urea","Si","Sampledepth")')
-    #robjects.r('keeps <- c("n_hit_station","alltranscripts","Chla","Lon","Lat","O","Sampledepth","Temp","Sal","pH","NO3","NO2","NH4","Urea","PO4","Si","DOP","NP","P","N","OXY")')
+    robjects.r('print(chosendataset)')
+    #robjects.r('keeps <- c("n_hit_station","alltranscripts","Chla","O","Temp","Sal","pH","N","NO3","NO2","NH4","DOP","NP","P","N","PO4","Urea","Si","Sampledepth","siga_alltranscripts","sig_a_n_hit_station")')
 
-    #robjects.r('keeps <- c("n_hit_station","alltranscripts","Lon","Lat","Thermocline","ChlorophyllMaxDepth","O","Sampledepth","Temp","Sal","pH","Chla","NO3","NO2","NH4","Urea","PO4","Si","DOP","NP","P","N","OXY")')
-    #robjects.r('keeps <- c("n_hit_station","alltranscripts","ChlMax","Lon","Lat","Water(m)","Thermocline","ChlorophyllMaxDepth","O","Sampledepth","Temp","Sal","pH","Chla","NO3","NO2","NH4","Urea","PO4","Si","DOP","NP","P","N","OXY")')
-
-
-
-
-
+    robjects.r('keeps <- c("n_hit_station","alltranscripts","Chla","O","Temp","Sal","pH","N","NO3","NO2","NH4","DOP","NP","P","N","PO4","Urea","Si","Sampledepth","sig_a_n_hit_station","pro_c_n_hit_station","cpc_g_n_hit_station")')
 
     robjects.r('factors<-chosendataset[keeps]')
-    robjects.r('factors$fraction<-factors$n_hit_station/factors$alltranscripts')
-    im4=robjects.r('environpairspic<-ggpairs(factors,diag=list(labelSize=4),upper = list(params = c(size = 4)),lower = list(continuous = "smooth", size=0.01,params = c(colour="red",method = "lm")))')
+    robjects.r('factors$fraction<-(factors$n_hit_station)/(factors$alltranscripts)')
+    #robjects.r('factors$fraction<-factors$n_hit_station/factors$alltranscripts')
+    robjects.r('factors$fractionofsiga<-factors$n_hit_station/factors$sig_a_n_hit_station')
+    robjects.r('factors$fractionofproc<-factors$n_hit_station/factors$pro_c_n_hit_station')
+    #robjects.r('factors$fractionofcpcg<-factors$n_hit_station/factors$cpc_g_n_hit_station')
+    robjects.r('print(factors)')
+    im4=robjects.r('environpairspic<-ggpairs(factors,diag=list(labelSize=3),upper = list(params = c(size = 4)),lower = list(continuous = "smooth", size=0.01,params = c(colour="red",method = "lm")))')
     envpairs=robjects.r('print(environpairspic)')
-#gp = ggplot2.ggplot(dataf)
-#gp = ggplot2.ggpairs(dataf)
 #robjects.r('ggsave("/Users/security/science/new3.pdf")')
     robjects.r('dev.off()')
+
+
+
+
 
 def bars(incsv,outname,w,h,graphtitle,plotvar):
     #graphtitle="Total number of reads"
@@ -262,6 +265,8 @@ def bars(incsv,outname,w,h,graphtitle,plotvar):
     robjects.r('library(reshape2)')
     robjects.r('library(RColorBrewer)')
     robjects.r('library(gridExtra)')
+
+    depth_title="surfaceORdeep"
 
     print incsv
     station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
@@ -318,23 +323,23 @@ def bars(incsv,outname,w,h,graphtitle,plotvar):
     make_text_plot+='+geom_text(aes(x = 4, y = 75, label = max_hit_count_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Transcript counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 70, label = "Highest surface transcript count='+str(maxreadcount[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 70, label = "Highest '+depth_title+' transcript count='+str(maxreadcount[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 65, label = max_read_count_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Frac counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 60, label = "Highest surface fraction='+str(maxfrac[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 60, label = "Highest '+depth_title+' fraction='+str(maxfrac[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 55, label = max_frac_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Is counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 45, label = "Lowest surface is count='+str(minhitcount[0])+'"), size=6,data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 45, label = "Lowest '+depth_title+' is count='+str(minhitcount[0])+'"), size=6,data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 40, label = min_hit_count_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Transcript counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 35, label = "Lowest surface transcript count='+str(minreadcount[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 35, label = "Lowest '+depth_title+' transcript count='+str(minreadcount[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 30, label = min_read_count_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Frac counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 25, label = "Lowest surface fraction='+str(minfrac[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 25, label = "Lowest '+depth_title+' fraction='+str(minfrac[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 20, label = min_frac_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+scale_x_continuous(limits=c(1, 100))'
     make_text_plot+='+scale_y_continuous(limits=c(1, 100))'
@@ -647,46 +652,46 @@ cur = con.cursor()
 # what columns are there?
 # made with pramga t outcsv
 ##############
-csvh=open("/Users/security/Desktop/headers2.csv","r")
-csread=csvh.read()
-css=csread.split("\n")
-
-
-heads=[]
-for u in css:
-    if u=="":
-        continue
-    uu=u.split(",")
-    heads.append(uu[1])
-
-print "heads"
-print heads
-
-
-stations=[]
-for i in range(33,87):
-   # print heads[i]
-    stations.append(heads[i])
-
-
-
-
-dethg=""
-for d in heads:
-    if "3p0" in d:
-        dethg+="SUM("+d+")+"
-        #dethg+=d+","
-
-
-dethg=dethg[:-1]
-#columns="SUM("+dethg+")"
-#columns=dethg
-print "dethg"
-print dethg
-
-
-
-
+#csvh=open("/Users/security/Desktop/headers2.csv","r")
+#csread=csvh.read()
+#css=csread.split("\n")
+#
+#
+#heads=[]
+#for u in css:
+#    if u=="":
+#        continue
+#    uu=u.split(",")
+#    heads.append(uu[1])
+#
+#print "heads"
+#print heads
+#
+#
+#stations=[]
+#for i in range(33,87):
+#   # print heads[i]
+#    stations.append(heads[i])
+#
+#
+#
+#
+#dethg=""
+#for d in heads:
+#    if "3p0" in d:
+#        dethg+="SUM("+d+")+"
+#        #dethg+=d+","
+#
+#
+#dethg=dethg[:-1]
+##columns="SUM("+dethg+")"
+##columns=dethg
+#print "dethg"
+#print dethg
+#
+#
+#
+#
 
 robjects.r('library(reshape2)')
 robjects.r('library(RColorBrewer)')
@@ -700,62 +705,61 @@ summarycsv=""
 
 # Sample one column
 ############
-columns="SUM("+"GS670_0p8"+")"
-selstring="SELECT "+columns+" FROM allist"
-with con:
-        cur.execute(selstring)
-reply=cur.fetchall()
-onesampl=reply[0][0]
-summarycsv+="Sample: sum of all transcripts at GS670_0p8:,"+str(onesampl)+"\n"
+#columns="SUM("+"GS670_0p8"+")"
+#selstring="SELECT "+columns+" FROM allist"
+#with con:
+#        cur.execute(selstring)
+#reply=cur.fetchall()
+#onesampl=reply[0][0]
+#summarycsv+="Sample: sum of all transcripts at GS670_0p8:,"+str(onesampl)+"\n"
 
 
 # Sample one column with hits
 ############
-columns="SUM("+"GS670_0p8"+")"
-selstring="SELECT "+columns+" FROM allist WHERE hit_abb!='nod'"
-#selstring="SELECT "+columns+" FROM allist WHERE isname!=''"
-with con:
-        cur.execute(selstring)
-reply=cur.fetchall()
-onesampl=reply[0][0]
-summarycsv+="Sample: sum of all hit transcripts at GS670_0p8:,"+str(onesampl)+"\n"
+#columns="SUM("+"GS670_0p8"+")"
+#selstring="SELECT "+columns+" FROM allist WHERE hit_abb!='nod'"
+##selstring="SELECT "+columns+" FROM allist WHERE isname!=''"
+#with con:
+#        cur.execute(selstring)
+#reply=cur.fetchall()
+#onesampl=reply[0][0]
+#summarycsv+="Sample: sum of all hit transcripts at GS670_0p8:,"+str(onesampl)+"\n"
 
 
 # compile a list with stations
 ###########
 stationcsv="name,mystation,filtersize,alltranscripts,n_hit_station,"+metahead.replace("\t",",")+"\n"
-if not os.path.isfile(args.outcsv+"stats.csv"):
-    for mystation in stations:
-        print "getting hit counts for "+mystation
-        stat_loc=mystation.split("_")[0]
-        stat_filt=mystation.split("_")[1]
-
-        columns="SUM("+mystation+")"
-        selstring="SELECT "+columns+" FROM allist"
-        with con:
-                cur.execute(selstring)
-        reply=cur.fetchall()
-        onesampl=reply[0][0]
-
-        columns="SUM("+mystation+")"
-        selstring="SELECT "+columns+" FROM allist WHERE hit_abb!='nod'"
-        with con:
-                cur.execute(selstring)
-        reply=cur.fetchall()
-        hitcount=reply[0][0]
-
-        stationcsv+=mystation+","+stat_loc+","+stat_filt+","+str(onesampl)+","+str(hitcount)+","+getfromcc(mystation.split("_")[0])+"\n"
+#if not os.path.isfile(args.outcsv+"stats.csv"):
+#    for mystation in stations:
+#        print "getting hit counts for "+mystation
+#        stat_loc=mystation.split("_")[0]
+#        stat_filt=mystation.split("_")[1]
 #
-    open(args.outcsv,"w").write(summarycsv)
-    fhh=open(args.outcsv+"stats.csv","w")
-    fhh.write(stationcsv)
-    fhh.close()
+#        columns="SUM("+mystation+")"
+#        selstring="SELECT "+columns+" FROM allist"
+#        with con:
+#                cur.execute(selstring)
+#        reply=cur.fetchall()
+#        onesampl=reply[0][0]
+#
+#        columns="SUM("+mystation+")"
+#        selstring="SELECT "+columns+" FROM allist WHERE hit_abb!='nod'"
+#        with con:
+#                cur.execute(selstring)
+#        reply=cur.fetchall()
+#        hitcount=reply[0][0]
+#
+#        stationcsv+=mystation+","+stat_loc+","+stat_filt+","+str(onesampl)+","+str(hitcount)+","+getfromcc(mystation.split("_")[0])+"\n"
+##
+#    open(args.outcsv,"w").write(summarycsv)
+#    fhh=open(args.outcsv+"stats.csv","w")
+#    fhh.write(stationcsv)
+#    fhh.close()
 
 # Main station info csv
 ###################
 station_dataset=robjects.r('statdataset <- read.delim("'+args.outcsv+"stats.csv"+'", sep="," , header=TRUE)')
-print station_dataset
-robjects.r('attach(statdataset)')
+#robjects.r('attach(statdataset)')
 
 
 grdevices = importr('grDevices')
@@ -769,14 +773,22 @@ cur4 = con4.cursor()
 
 dropstring="DROP TABLE IF EXISTS "+"t"
 cur4.execute(dropstring)
-cur4.execute('CREATE TABLE t (name,mystation,filtersize,n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon,Lat,"Water(m)","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth,Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY);')
+cur4.execute('CREATE TABLE t (name,mystation,filtersize,n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon,Lat,"Water","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth,Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY,sig_a_alltranscripts,sig_a_n_hit_station,pro_c_alltranscripts,pro_c_n_hit_station,cpc_g_alltranscripts,cpc_g_n_hit_station);')
+
+#"siga_alltranscripts","sig_a_n_hit_station","pro_c_alltranscripts","pro_c_n_hit_station"
+#'siga_alltranscripts','sig_a_n_hit_station','pro_c_alltranscripts','pro_c_n_hit_station'
+#SUM(siga_alltranscripts),SUM(sig_a_n_hit_station),SUM(pro_c_alltranscripts),SUM(pro_c_n_hit_station)
+#i['siga_alltranscripts'],i[sig_a_n_hit_station'],i[pro_c_alltranscripts'],i[pro_c_n_hit_station']
+
 
 with open(args.outcsv+"stats.csv",'r') as fin: # `with` statement available in 2.5+
     # csv.DictReader uses first line in file for column headings by default
     dr = csv.DictReader(fin) # comma is default delimiter
-    to_db = [(i['name'],i['mystation'],i['filtersize'], i['n_hit_station'],i['alltranscripts'],i['Basin'],i['Size'],i['ChlMax'],i['Lon'], i['Lat'],i['Water(m)'],i['Water (Ft)'],i['Thermocline'],i['ChlorophyllMaxDepth'],i['O'],i['Sampledepth'],i['Temp'],i['Sal'],i['pH'],i['Chla'],i['NO3'],i['NO2'],i['NH4'],i['Urea'],i['PO4'],i['Si'],i['DOP'],i['NP'],i['P'],i['N'],i['OXY']) for i in dr]
+    to_db = [(i['name'],i['mystation'],i['filtersize'], i['n_hit_station'],i['alltranscripts'],i['Basin'],i['Size'],i['ChlMax'],i['Lon'], i['Lat'],i['Water'],i['Water (Ft)'],i['Thermocline'],i['ChlorophyllMaxDepth'],i['O'],i['Sampledepth'],i['Temp'],i['Sal'],i['pH'],i['Chla'],i['NO3'],i['NO2'],i['NH4'],i['Urea'],i['PO4'],i['Si'],i['DOP'],i['NP'],i['P'],i['N'],i['OXY'],i['sig_a_alltranscripts'],i['sig_a_n_hit_station'],i['pro_c_alltranscripts'],i['pro_c_n_hit_station'],i['cpc_g_alltranscripts'],i['cpc_g_n_hit_station']) for i in dr]
 
-cur4.executemany('INSERT INTO t (name,mystation,filtersize, n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon, Lat,"Water(m)","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth, Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY) VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);', to_db)
+
+
+cur4.executemany('INSERT INTO t (name,mystation,filtersize, n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon, Lat,"Water","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth, Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY,sig_a_alltranscripts,sig_a_n_hit_station,pro_c_alltranscripts,pro_c_n_hit_station,cpc_g_alltranscripts,cpc_g_n_hit_station) VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);', to_db)
 con4.commit()
 
 
@@ -785,113 +797,115 @@ con4.commit()
 
 #make csv for all depths, added filtersizes
 have_lats_filtadd_csv=basepicdir+"have_lats_filtersadd.csv"
-data = cur4.execute('SELECT name,mystation, sum(n_hit_station),sum(alltranscripts), ChlMax,Lon, Lat,"Water(m)" AS Water,"Water (Ft)",Thermocline,ChlorophyllMaxDepth, O,Sampledepth Temp, Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!="nod2" GROUP BY mystation')
+data1 = cur4.execute('SELECT name,mystation, sum(n_hit_station),sum(alltranscripts), ChlMax,Lon, Lat,"Water","Water (Ft)",Thermocline,ChlorophyllMaxDepth, O,Sampledepth ,Temp, Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY,SUM(sig_a_alltranscripts),SUM(sig_a_n_hit_station),SUM(pro_c_alltranscripts),SUM(pro_c_n_hit_station),SUM(cpc_g_alltranscripts),SUM(cpc_g_n_hit_station) FROM t WHERE Lat!="nod2" GROUP BY mystation')
+#data = cur4.execute('SELECT name,mystation, sum(n_hit_station),sum(alltranscripts), ChlMax,Lon, Lat,"Water(m)" AS Water,"Water (Ft)",Thermocline,ChlorophyllMaxDepth, O,Sampledepth Temp, Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY,SUM(siga_alltranscripts),SUM(sig_a_n_hit_station),SUM(pro_c_alltranscripts),SUM(pro_c_n_hit_station) FROM t WHERE Lat!="nod2" GROUP BY mystation')
 with open(have_lats_filtadd_csv, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','ChlMax','Lon', 'Lat','Water','Water (Ft)','Thermocline','ChlorophyllMaxDepth','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
-    writer.writerows(data)
+    writer.writerow(['name','mystation','n_hit_station','alltranscripts','ChlMax','Lon', 'Lat','Water','Water (Ft)','Thermocline','ChlorophyllMaxDepth','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY','sig_a_alltranscripts','sig_a_n_hit_station','pro_c_alltranscripts','pro_c_n_hit_station','cpc_g_alltranscripts','cpc_g_n_hit_station'])
+    #writer.writerow(['name','mystation','n_hit_station','alltranscripts','ChlMax','Lon', 'Lat','Water','Water (Ft)','Thermocline','ChlorophyllMaxDepth','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY','siga_alltranscripts','sig_a_n_hit_station','pro_c_alltranscripts','pro_c_n_hit_station'])
+    writer.writerows(data1)
 
 
 
 # Make bar graphs with filtersizes added
 graphtitle="Total number of reads"
-bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_alltranscripts.pdf",10,10,graphtitle,"alltranscripts")
-graphtitle="Total number of rpod"
-bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_rpods.pdf",10,10,graphtitle,"n_hit_station")
-graphtitle="n_hit_station_alltranscripts"
-bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_rpods_div_alltranscripts.pdf",10,10,graphtitle,"n_hit_station/alltranscripts")
-
-# Make more bar graphs with added filtersizes
-bars(have_lats_filtadd_csv,basepicdir+"bars_ouput.pdf",10,10,graphtitle,"alltranscripts")
-makepairs(have_lats_filtadd_csv,basepicdir+"environmental_pairs.png",10,10,graphtitle,"alltranscripts")
-
-make_model(have_lats_filtadd_csv,basepicdir+"model.pdf",5,10,"graphtitle","model")
-
-
-
-#make csv for all depths, all filtersizes
-have_lats_csv=basepicdir+"have_lats.csv"
-data = cur4.execute("SELECT name,mystation, filtersize,n_hit_station,alltranscripts, Lon, Lat, O,Sampledepth, Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2'")
-with open(have_lats_csv, 'w') as f:
-    writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
-    writer.writerows(data)
-
-#graphtitle="Total number of reads"
-#bar_allsize(have_lats_csv,basepicdir+"allbars_alltranscripts.pdf",10,10,graphtitle,"alltranscripts")
+#bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_alltranscripts.pdf",10,10,graphtitle,"alltranscripts")
 #graphtitle="Total number of rpod"
-#bar_allsize(have_lats_csv,basepicdir+"allbars_rpods.pdf",10,10,graphtitle,"n_hit_station")
+#bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_rpods.pdf",10,10,graphtitle,"n_hit_station")
 #graphtitle="n_hit_station_alltranscripts"
-#bar_allsize(have_lats_csv,basepicdir+"allbars_rpods_div_alltranscripts.pdf",10,10,graphtitle,"n_hit_station/alltranscripts")
+#bar_allsize(have_lats_filtadd_csv,basepicdir+"allbars_rpods_div_alltranscripts.pdf",10,10,graphtitle,"n_hit_station/alltranscripts")
 #
-# Collect data with filter sizes
-#data = cur4.execute("SELECT name,mystation, alltranscripts, Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806")
+## Make more bar graphs with added filtersizes
+#bars(have_lats_filtadd_csv,basepicdir+"bars_ouput.pdf",10,10,graphtitle,"alltranscripts")
+makepairs(have_lats_filtadd_csv,basepicdir+"environmental_pairs.png",20,20,graphtitle,"alltranscripts")
 
-surfLats_csv=basepicdir+"surf_lats.csv"
-# Make database with latitudes with sampledepth < 0.3
-#######################
-#data = cur4.execute("SELECT * FROM t")
-#data = cur4.execute("SELECT * FROM t WHERE Lat!='nod2'")
-data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth ,Temp, Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
-with open(surfLats_csv, 'w') as f:
-    writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
-    writer.writerows(data)
-
-    
-bars(surfLats_csv,basepicdir+"surface_bars_ouput.pdf",10,10,graphtitle,"alltranscripts")
-
-surfLats_csv2=basepicdir+"surf_lats2.csv"
-# Make database with latitudes with sampledepth < 0.3
-#######################
-#data = cur4.execute("SELECT * FROM t")
-#data = cur4.execute("SELECT * FROM t WHERE Lat!='nod2'")
-data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth, Temp,Sal ,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
-with open(surfLats_csv2, 'w') as f:
-    writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
-    writer.writerows(data)
-
-
-# write surface maps
-#gogmap_google(surfLats_csv,basepicdir+"surface_hybrid_map.pdf",10,10)
-#with_rworld(surfLats_csv,basepicdir+"surface_rworld.pdf",10,10)
-#gogmap_google('/Users/security/science/output.csv',"/Users/security/science/surfacemap.pdf")
-
-
-midLats_csv=basepicdir+"mid_lats.csv"
-# Make database with latitudes with sampledepth < middle
-#######################
-data = cur4.execute("SELECT name,mystation, sum(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth, Temp, Sal ,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>0.30487806 AND cast(Sampledepth as float)<20 GROUP BY mystation")
-with open(midLats_csv, 'w') as f:
-    writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
-    writer.writerows(data)
-
-#gogmap_google(midLats_csv,basepicdir+"middle_hybrid_map.pdf",10,10)
-#with_rworld(midLats_csv,basepicdir+"middlemap_rworld.pdf",10,10)
-
-
-bars(midLats_csv,basepicdir+"deep_bars_ouput.pdf",10,10,graphtitle,"alltranscripts")
-
-#deepLats_csv=basepicdir+"deep_lats.csv"
-## Deep lvl
-#################
-#data = cur4.execute("SELECT name,mystation, SUM(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>20 AND cast(Sampledepth as float)<200 GROUP BY mystation")
-#with open(deepLats_csv, 'w') as f:
+make_model(have_lats_filtadd_csv,basepicdir+"model.pdf",5,20,"graphtitle","model")
+#
+#
+#
+##make csv for all depths, all filtersizes
+#have_lats_csv=basepicdir+"have_lats.csv"
+#data = cur4.execute("SELECT name,mystation, filtersize,n_hit_station,alltranscripts, Lon, Lat, O,Sampledepth, Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2'")
+#with open(have_lats_csv, 'w') as f:
 #    writer = csv.writer(f)
-#    writer.writerow(['name','mystation','alltranscripts','Lon', 'Lat','Sampledepth'])
+#    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
 #    writer.writerows(data)
-
-
-#gogmap_google(deepLats_csv,basepicdir+"deep_hybrid_map.pdf",10,10)
-#with_rworld (deepLats_csv,basepicdir+"deep_rworld_map.pdf",10,10)
-
-
-gogmap3(surfLats_csv,midLats_csv,basepicdir+"deep_map_multi.pdf",10,10)
-
-
-
+#
+##graphtitle="Total number of reads"
+##bar_allsize(have_lats_csv,basepicdir+"allbars_alltranscripts.pdf",10,10,graphtitle,"alltranscripts")
+##graphtitle="Total number of rpod"
+##bar_allsize(have_lats_csv,basepicdir+"allbars_rpods.pdf",10,10,graphtitle,"n_hit_station")
+##graphtitle="n_hit_station_alltranscripts"
+##bar_allsize(have_lats_csv,basepicdir+"allbars_rpods_div_alltranscripts.pdf",10,10,graphtitle,"n_hit_station/alltranscripts")
+##
+## Collect data with filter sizes
+##data = cur4.execute("SELECT name,mystation, alltranscripts, Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806")
+#
+#surfLats_csv=basepicdir+"surf_lats.csv"
+## Make database with latitudes with sampledepth < 0.3
+########################
+##data = cur4.execute("SELECT * FROM t")
+##data = cur4.execute("SELECT * FROM t WHERE Lat!='nod2'")
+#data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth ,Temp, Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
+#with open(surfLats_csv, 'w') as f:
+#    writer = csv.writer(f)
+#    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
+#    writer.writerows(data)
+#
+#    
+#bars(surfLats_csv,basepicdir+"surface_bars_ouput.pdf",10,10,graphtitle,"alltranscripts")
+#
+#surfLats_csv2=basepicdir+"surf_lats2.csv"
+## Make database with latitudes with sampledepth < 0.3
+########################
+##data = cur4.execute("SELECT * FROM t")
+##data = cur4.execute("SELECT * FROM t WHERE Lat!='nod2'")
+#data = cur4.execute("SELECT name,mystation, SUM(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth, Temp,Sal ,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)<=0.30487806 GROUP BY mystation")
+#with open(surfLats_csv2, 'w') as f:
+#    writer = csv.writer(f)
+#    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
+#    writer.writerows(data)
+#
+#
+## write surface maps
+##gogmap_google(surfLats_csv,basepicdir+"surface_hybrid_map.pdf",10,10)
+##with_rworld(surfLats_csv,basepicdir+"surface_rworld.pdf",10,10)
+##gogmap_google('/Users/security/science/output.csv',"/Users/security/science/surfacemap.pdf")
+#
+#
+#midLats_csv=basepicdir+"mid_lats.csv"
+## Make database with latitudes with sampledepth < middle
+########################
+#data = cur4.execute("SELECT name,mystation, sum(n_hit_station),SUM(alltranscripts), Lon, Lat, O,Sampledepth, Temp, Sal ,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>0.30487806 AND cast(Sampledepth as float)<20 GROUP BY mystation")
+#with open(midLats_csv, 'w') as f:
+#    writer = csv.writer(f)
+#    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
+#    writer.writerows(data)
+#
+##gogmap_google(midLats_csv,basepicdir+"middle_hybrid_map.pdf",10,10)
+##with_rworld(midLats_csv,basepicdir+"middlemap_rworld.pdf",10,10)
+#
+#
+#bars(midLats_csv,basepicdir+"deep_bars_ouput.pdf",10,10,graphtitle,"alltranscripts")
+#
+##deepLats_csv=basepicdir+"deep_lats.csv"
+### Deep lvl
+##################
+##data = cur4.execute("SELECT name,mystation, SUM(alltranscripts), Lon, Lat, Sampledepth FROM t WHERE Lat!='nod2' AND cast(Sampledepth as float)>20 AND cast(Sampledepth as float)<200 GROUP BY mystation")
+##with open(deepLats_csv, 'w') as f:
+##    writer = csv.writer(f)
+##    writer.writerow(['name','mystation','alltranscripts','Lon', 'Lat','Sampledepth'])
+##    writer.writerows(data)
+#
+#
+##gogmap_google(deepLats_csv,basepicdir+"deep_hybrid_map.pdf",10,10)
+##with_rworld (deepLats_csv,basepicdir+"deep_rworld_map.pdf",10,10)
+#
+#
+#gogmap3(surfLats_csv,midLats_csv,basepicdir+"deep_map_multi.pdf",10,10)
+#
+#
+#
 
 #for filtersize in ["0p1","0p8","3p0"]:
 #
@@ -1041,6 +1055,7 @@ gogmap3(surfLats_csv,midLats_csv,basepicdir+"deep_map_multi.pdf",10,10)
 #
 #    robjects.r.ggsave("/Users/security/science/"+depth+"siga_fractions.pdf")
 #    #robjects.r.ggsave(args.out.replace(".pdf","")+depth+".pdf")
+
 
 
 

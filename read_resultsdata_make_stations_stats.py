@@ -26,7 +26,7 @@ def singleplot(yvar):
     titlesize=str(6)
     yvar_in="modeldata$"+yvar
     modelmkstring=yvar+'plot<-ggplot(data=modeldata, aes(x='+yvar_in+', y=fraction,fill="green"))'
-    modelmkstring+='+ geom_point(data=modeldata,aes(x='+yvar_in+', y=fraction,color="blue", size='+pointsize+'))'
+    modelmkstring+='+ geom_point(data=modeldata,aes(x='+yvar_in+', y=fraction,color="blue"), size='+pointsize+')'
     modelmkstring+='+stat_smooth(data=modeldata,method = "lm", se=TRUE, color="black", formula = y ~ x)'
     modelmkstring+='+scale_x_continuous("'+yvar+'")'
     modelmkstring+='+ggtitle("'+yvar+'")'
@@ -104,6 +104,8 @@ def get_bar_settings(title,yname):
     mycolorfirst = "%06x" % random.randint(0,0xFFFFFF)
     mycolor="#"+str(mycolorfirst).upper()
     print mycolor
+
+    mycolor="#1975D1"
     plottitlesize=str(8)
     axistextsize=str(8)
     axistitlesize=str(8)
@@ -112,7 +114,8 @@ def get_bar_settings(title,yname):
     robjects.r('library(scales)')
     bar_settings='geom_bar(stat="identity",position=position_dodge(),fill="'+mycolor+'")'    
 
-    bar_settings+='+ggtitle("'+title+mycolor+'")' 
+    bar_settings+='+ggtitle("'+title+'")' 
+    #bar_settings+='+ggtitle("'+title+mycolor+'")' 
     bar_settings+='+theme('
     bar_settings+='plot.title = element_text(size='+plottitlesize+',lineheight=0.8)'
     bar_settings+=',axis.text.x=element_text(size='+axistextsize+',angle=0)'
@@ -125,7 +128,7 @@ def get_bar_settings(title,yname):
     #bar_settings+='+geom_text(size=3,color="red",aes(x=0,y=0,label="'+mycolor+'"))'
     bar_settings+='+scale_x_discrete(name="'+xname+'")'     
     bar_settings+=''     
-    bar_settings+='+scale_y_continuous(labels=comma, name="'+yname+'")'     
+    bar_settings+='+scale_y_continuous(limits=c(0,0.01),labels=comma, name="'+yname+'")'     
 
 #teest=robjects.r('p<-p+coord_fixed(ratio=400)')
     return bar_settings
@@ -203,7 +206,7 @@ def make_model(incsv,outname,w,h,graphtitle,plotvar):
     
     robjects.r('modeldata$fraction<-modeldata$n_hit_station/modeldata$alltranscripts')
 
-    envarlist=["alltranscripts","NH4","Temp","Sal","NO3","P"]
+    envarlist=["alltranscripts","N","Temp","Sal","NO3","P","Urea"]
     for envar in envarlist:
         yvar_in="modeldata$"+envar
         robjects.r(envar+'stats<-cor.test(modeldata$fraction,'+yvar_in+',model="spearman")')
@@ -236,22 +239,12 @@ def makepairs(incsv,outname,w,h,graphtitle,plotvar):
     robjects.r('png("'+outname+'",width=2000,heigh=2000)')
     station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
     robjects.r('keeps <- c("n_hit_station","alltranscripts","Chla","O","Temp","Sal","pH","N","NO3","NO2","NH4","DOP","NP","P","N","PO4","Urea","Si","Sampledepth")')
-    #robjects.r('keeps <- c("n_hit_station","alltranscripts","Chla","Lon","Lat","O","Sampledepth","Temp","Sal","pH","NO3","NO2","NH4","Urea","PO4","Si","DOP","NP","P","N","OXY")')
-
-    #robjects.r('keeps <- c("n_hit_station","alltranscripts","Lon","Lat","Thermocline","ChlorophyllMaxDepth","O","Sampledepth","Temp","Sal","pH","Chla","NO3","NO2","NH4","Urea","PO4","Si","DOP","NP","P","N","OXY")')
-    #robjects.r('keeps <- c("n_hit_station","alltranscripts","ChlMax","Lon","Lat","Water(m)","Thermocline","ChlorophyllMaxDepth","O","Sampledepth","Temp","Sal","pH","Chla","NO3","NO2","NH4","Urea","PO4","Si","DOP","NP","P","N","OXY")')
-
-
-
-
-
 
     robjects.r('factors<-chosendataset[keeps]')
     robjects.r('factors$fraction<-factors$n_hit_station/factors$alltranscripts')
+    robjects.r('factors<-scale(factors)')
     im4=robjects.r('environpairspic<-ggpairs(factors,diag=list(labelSize=4),upper = list(params = c(size = 4)),lower = list(continuous = "smooth", size=0.01,params = c(colour="red",method = "lm")))')
     envpairs=robjects.r('print(environpairspic)')
-#gp = ggplot2.ggplot(dataf)
-#gp = ggplot2.ggpairs(dataf)
 #robjects.r('ggsave("/Users/security/science/new3.pdf")')
     robjects.r('dev.off()')
 
@@ -262,6 +255,8 @@ def bars(incsv,outname,w,h,graphtitle,plotvar):
     robjects.r('library(reshape2)')
     robjects.r('library(RColorBrewer)')
     robjects.r('library(gridExtra)')
+
+    depth_title="surfaceORdeep"
 
     print incsv
     station_dataset=robjects.r('chosendataset <- read.delim("'+incsv+'", sep="," , header=TRUE)')
@@ -318,23 +313,23 @@ def bars(incsv,outname,w,h,graphtitle,plotvar):
     make_text_plot+='+geom_text(aes(x = 4, y = 75, label = max_hit_count_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Transcript counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 70, label = "Highest surface transcript count='+str(maxreadcount[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 70, label = "Highest '+depth_title+' transcript count='+str(maxreadcount[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 65, label = max_read_count_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Frac counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 60, label = "Highest surface fraction='+str(maxfrac[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 60, label = "Highest '+depth_title+' fraction='+str(maxfrac[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 55, label = max_frac_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Is counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 45, label = "Lowest surface is count='+str(minhitcount[0])+'"), size=6,data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 45, label = "Lowest '+depth_title+' is count='+str(minhitcount[0])+'"), size=6,data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 40, label = min_hit_count_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Transcript counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 35, label = "Lowest surface transcript count='+str(minreadcount[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 35, label = "Lowest '+depth_title+' transcript count='+str(minreadcount[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 30, label = min_read_count_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
 
     # Frac counts
-    make_text_plot+='+geom_text(aes(x = 5, y = 25, label = "Lowest surface fraction='+str(minfrac[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
+    make_text_plot+='+geom_text(aes(x = 5, y = 25, label = "Lowest '+depth_title+' fraction='+str(minfrac[0])+'"), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+geom_text(aes(x = 4, y = 20, label = min_frac_name), size='+str(text_size)+',data = plotdf, colour = I("black"),hjust=0)'
     make_text_plot+='+scale_x_continuous(limits=c(1, 100))'
     make_text_plot+='+scale_y_continuous(limits=c(1, 100))'
@@ -487,7 +482,7 @@ def gogmap3(incsv_surf,incsv_mid,outname,w,h):
     station_dataset=robjects.r('chosendataset_mid <- read.delim("'+incsv_mid+'", sep="," , header=TRUE)')
 
     graphtitle="IS fraction of transcripts"
-    robjects.r('bargall_mid_frac<-ggplot(data=chosendataset_mid, aes(x=mystation, y='+"n_hit_station/alltranscripts"+',fill="'+mycolor+'"))')
+    robjects.r('bargall_mid_frac<-ggplot(data=chosendataset_mid, aes(x=mystation, y='+"n_hit_station/alltranscripts"+',fill="'+"#1975D1"+'"))')
     lol='bargall_mid_frac<-bargall_mid_frac+'+get_bar_settings(graphtitle,"IS frac. of total")
     robjects.r(lol)
 
@@ -579,7 +574,7 @@ def gogmap3(incsv_surf,incsv_mid,outname,w,h):
     grid_arrangement+='main=textGrob("Insertion sequences in the Baltic Sea 2009", gp = gpar(fontsize=18, fontface="bold.italic", fontsize=18))'
     grid_arrangement+=',widths=1:1)'
 
-    hh='grid.arrange( arrangeGrob( surf_points,arrangeGrob(bargall_shallow_frac,environment_shallow,ncol=1,heights=c(1,1)) ,ncol=2,main="Shallow (0.5m)"),arrangeGrob(mid_points,arrangeGrob(bargall_mid_frac,environment_mid,ncol=1,heights=c(1,1)) ,ncol=2,main="Deep") ,ncol=1,main=textGrob("\nInsertion sequences in the Baltic Sea 2009\n", gp = gpar(fontsize=18, fontface="bold", fontsize=18)),widths=1:1)'
+    hh='grid.arrange( arrangeGrob( surf_points,arrangeGrob(bargall_shallow_frac,environment_shallow,ncol=1,heights=c(1,1)) ,ncol=2,main="Shallow (0.5m)"),arrangeGrob(mid_points,arrangeGrob(bargall_mid_frac,environment_mid,ncol=1,heights=c(1,1)) ,ncol=2,main="Deep (0.5 m <depth< 20m)") ,ncol=1,main=textGrob("\nInsertion sequences in the Baltic Sea 2009\n", gp = gpar(fontsize=18, fontface="bold", fontsize=18)),widths=1:1)'
     #hh='grid.arrange( arrangeGrob( surf_points,arrangeGrob(bargall_shallow_frac,bargall_shallow_is,bargall_shallow,ncol=1,heights=c(2,1,1)) ,ncol=2,main="Shallow"),arrangeGrob(mid_points,arrangeGrob(bargall_mid_frac,bargall_mid_hits,environment_shallow,ncol=1,heights=c(2,1,1)) ,ncol=2,main="Deep") ,ncol=1,main=textGrob("\nInsertion sequences in the Baltic Sea 2009\n", gp = gpar(fontsize=18, fontface="bold", fontsize=18)),widths=1:1)'
     #hh='grid.arrange( arrangeGrob( surf_points,arrangeGrob(bargall_shallow_frac,bargall_shallow_is,bargall_shallow,ncol=1,heights=c(2,1,1)) ,ncol=2,main="Shallow"),arrangeGrob(mid_points,arrangeGrob(bargall_mid_frac,bargall_mid_hits,bargall_mid_total_transcripts,ncol=1,heights=c(2,1,1)) ,ncol=2,main="Deep") ,ncol=1,main=textGrob("\nInsertion sequences in the Baltic Sea 2009\n", gp = gpar(fontsize=18, fontface="bold", fontsize=18)),widths=1:1)'
 
@@ -769,14 +764,15 @@ cur4 = con4.cursor()
 
 dropstring="DROP TABLE IF EXISTS "+"t"
 cur4.execute(dropstring)
-cur4.execute('CREATE TABLE t (name,mystation,filtersize,n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon,Lat,"Water(m)","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth,Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY);')
+addstring='CREATE TABLE t (name,mystation,filtersize,n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon,Lat,"Water(m)","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth,Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY);'
+cur4.execute(addstring)
 
 with open(args.outcsv+"stats.csv",'r') as fin: # `with` statement available in 2.5+
     # csv.DictReader uses first line in file for column headings by default
     dr = csv.DictReader(fin) # comma is default delimiter
-    to_db = [(i['name'],i['mystation'],i['filtersize'], i['n_hit_station'],i['alltranscripts'],i['Basin'],i['Size'],i['ChlMax'],i['Lon'], i['Lat'],i['Water(m)'],i['Water (Ft)'],i['Thermocline'],i['ChlorophyllMaxDepth'],i['O'],i['Sampledepth'],i['Temp'],i['Sal'],i['pH'],i['Chla'],i['NO3'],i['NO2'],i['NH4'],i['Urea'],i['PO4'],i['Si'],i['DOP'],i['NP'],i['P'],i['N'],i['OXY']) for i in dr]
+    to_db = [(i['name'],i['mystation'],i['filtersize'],i['n_hit_station'],i['alltranscripts'],i['Basin'],i['Size'],i['ChlMax'],i['Lon'], i['Lat'],i['Water(m)'],i['Water (Ft)'],i['Thermocline'],i['ChlorophyllMaxDepth'],i['O'],i['Sampledepth'],i['Temp'],i['Sal'],i['pH'],i['Chla'],i['NO3'],i['NO2'],i['NH4'],i['Urea'],i['PO4'],i['Si'],i['DOP'],i['NP'],i['P'],i['N'],i['OXY']) for i in dr]
 
-cur4.executemany('INSERT INTO t (name,mystation,filtersize, n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon, Lat,"Water(m)","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth, Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY) VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);', to_db)
+cur4.executemany('INSERT INTO t (name,mystation,filtersize,n_hit_station,alltranscripts,Basin,Size,ChlMax,Lon, Lat,"Water(m)","Water (Ft)",Thermocline,ChlorophyllMaxDepth,O,Sampledepth,Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY) VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);', to_db)
 con4.commit()
 
 
@@ -785,7 +781,7 @@ con4.commit()
 
 #make csv for all depths, added filtersizes
 have_lats_filtadd_csv=basepicdir+"have_lats_filtersadd.csv"
-data = cur4.execute('SELECT name,mystation, sum(n_hit_station),sum(alltranscripts), ChlMax,Lon, Lat,"Water(m)" AS Water,"Water (Ft)",Thermocline,ChlorophyllMaxDepth, O,Sampledepth Temp, Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!="nod2" GROUP BY mystation')
+data = cur4.execute('SELECT name,mystation, sum(n_hit_station),sum(alltranscripts), ChlMax,Lon, Lat,"Water(m)" AS Water,"Water (Ft)",Thermocline,ChlorophyllMaxDepth, O,Sampledepth ,Temp, Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!="nod2" GROUP BY mystation')
 with open(have_lats_filtadd_csv, 'w') as f:
     writer = csv.writer(f)
     writer.writerow(['name','mystation','n_hit_station','alltranscripts','ChlMax','Lon', 'Lat','Water','Water (Ft)','Thermocline','ChlorophyllMaxDepth','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
@@ -814,7 +810,7 @@ have_lats_csv=basepicdir+"have_lats.csv"
 data = cur4.execute("SELECT name,mystation, filtersize,n_hit_station,alltranscripts, Lon, Lat, O,Sampledepth, Temp,Sal,pH,Chla,NO3,NO2,NH4,Urea,PO4,Si,DOP,NP,P,N,OXY FROM t WHERE Lat!='nod2'")
 with open(have_lats_csv, 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(['name','mystation','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
+    writer.writerow(['name','mystation','filtersize','n_hit_station','alltranscripts','Lon', 'Lat','O','Sampledepth','Temp','Sal','pH','Chla','NO3','NO2','NH4','Urea','PO4','Si','DOP','NP','P','N','OXY'])
     writer.writerows(data)
 
 #graphtitle="Total number of reads"
